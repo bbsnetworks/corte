@@ -1,0 +1,15 @@
+.nav-link{
+	color: white !important;
+	font-weight: bold;
+}
+.nav{
+	height: 80px;
+}
+.navbar{
+	background-color: #4761FF !important;
+}
+nav>div>a{
+	margin-left: 15px;
+	color: white !important;
+	font-size: 1.5rem !important;
+}

@@ -1,0 +1,150 @@
+.txt1>span{
+    font-size: 3rem;
+    color: var(--blue);
+    margin: 25px 0px 25px 0px;
+    font-weight: 700;
+}
+.tabla{
+    padding: 35px;
+}
+tr{
+    height: 50px;
+}
+td,th{
+    text-align: center;
+}
+th{
+    background-color: var(--blue) !important;
+    color: white;
+}
+td{
+    font-weight: 500;
+    color: var(--blue);
+    vertical-align: middle;
+    padding: 10px;
+    width: 100px;
+    height: 50px;
+}
+.img-tabla{
+    width: 100px;
+    cursor: pointer;
+    object-fit: cover;
+    height: 100px;
+}
+table.dataTable th.dt-type-numeric, table.dataTable th.dt-type-date, table.dataTable td.dt-type-numeric, table.dataTable td.dt-type-date {
+    text-align: center;
+}
+table.dataTable thead>tr>th.dt-orderable-asc, table.dataTable thead>tr>th.dt-orderable-desc, table.dataTable thead>tr>td.dt-orderable-asc, table.dataTable thead>tr>td.dt-orderable-desc {
+    text-align: center;
+}
+.txt-total{
+    font-size: xx-large;
+    color: var(--blue);
+    font-weight: 600;
+}
+.total-corte{
+    font-size: xx-large;
+    font-weight: 600;
+}
+.noc1>:first-child,.noc2>:first-child{
+    box-shadow: 0px 10px 46px 25px rgba(0,0,0,0.1);
+    background: #16192f;
+    width: 95%;
+    height: 1100px;
+    border-radius: 25px;
+    margin: 50px;
+    padding: 20px;
+    min-width: 250px;
+    text-align: center;
+}
+.txt-name>span{
+    color: var(--orange);
+    font-size: 4rem;
+    font-weight: 600;
+}
+.total>span{
+    color: var(--blue);
+    font-size: 4.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+.label-e>span{
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--orange);
+}
+.label-e-bbs>span{
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--orange);
+}
+.monto-e>span{
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--blue);
+}
+.monto-e-bbs>span{
+    font-size: 2.3rem;
+    font-weight: 500;
+    color: var(--blue);
+}
+.txt-total-e>span{
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--orange);
+}
+.txt-total-e-bbs>span{
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--orange);
+}
+.total-e>span{
+    font-size: 2.2rem;
+    font-weight: 500;
+    color: var(--blue);
+}
+.total-e-bbs>span{
+    font-size: 3rem;
+    font-weight: 500;
+    color: var(--blue);
+}
+.datos{
+    margin: 50px 0px 50px 0px;
+}
+.txt-ganancias>span{
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+.total-ganancias>span{
+    font-size: 2.7rem;
+    font-weight: 500;
+    color: var(--blue);
+    margin-bottom: 50px;
+}
+.label-ganancia>span{
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--orange);
+}
+.qty-ganancia>span{
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--blue);  
+}
+.txt-lista>span{
+    font-size: 3rem;
+    color: var(--blue);
+}
+.form-control,.form-select{
+    background-color: #212529 !important;
+    color: white;
+}
+@media (max-width: 991.98px) {
+    .dt-layout-table{
+        overflow-x: scroll;
+    }
+    .noc1>:first-child,.noc2>:first-child{
+    
+    height: auto;
+}
+}

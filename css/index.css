@@ -1,0 +1,15 @@
+body{
+	background-color: #f4f4f4;
+}
+.main{
+	height: 100vh;
+}
+.main-row{
+	height: 80%;
+}
+.boton>button{
+	height: 100px;
+	width: 600px;
+	background-color: var(--blue);
+	font-size: x-large;
+}
