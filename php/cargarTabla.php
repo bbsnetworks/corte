@@ -22,7 +22,8 @@ if ($search !== '') {
         g.titulo LIKE '%$searchEscaped%' OR
         g.fecha LIKE '%$searchEscaped%' OR
         u.nombre LIKE '%$searchEscaped%' OR
-        g.tipo LIKE '%$searchEscaped%'
+        g.tipo LIKE '%$searchEscaped%' OR
+        CAST(g.costo AS CHAR) LIKE '%$searchEscaped%'
     )";
 }
 

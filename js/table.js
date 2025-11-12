@@ -68,53 +68,56 @@ function cargarTabla(mes, year, search = "") {
 // Renderizado tabla
 // =====================
 function renderTable() {
-    const searchValue = $("#buscar").val().toLowerCase();
-    const filteredData = dataRegistros.filter(row =>
-        row.id.toLowerCase().includes(searchValue) ||
-        row.titulo.toLowerCase().includes(searchValue) ||
-        row.tipo.toLowerCase().includes(searchValue) ||
-        row.usuario.toLowerCase().includes(searchValue) ||
-        row.costo.toLowerCase().includes(searchValue)
-    );
+  const q = ($("#buscar").val() || "").toLowerCase();
 
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    const dataToShow = filteredData.slice(start, end);
+  const inc = (v) => String(v ?? "").toLowerCase().includes(q);
 
-    let html = "";
-    dataToShow.forEach(row => {
+  const filteredData = dataRegistros.filter(row =>
+    inc(row.id) ||
+    inc(row.titulo) ||
+    inc(row.tipo) ||
+    inc(row.usuario) ||
+    inc(row.costo) ||    // <-- ahora busca por costo
+    inc(row.fecha)       // (opcional) útil si quieres también por fecha
+  );
+
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const dataToShow = filteredData.slice(start, end);
+
+  let html = "";
+  dataToShow.forEach(row => {
     html += `
-        <tr class="border-b border-gray-700">
-            <td class="p-3">${row.id}</td>
-            <td class="p-3">${row.fecha}</td>
-            <td class="p-3">${row.titulo || '-'}</td>
-            <td class="p-3">$${row.costo}</td>
-            <td class="p-3">${row.tipo}</td>
-            <td class="p-3">${row.usuario}</td>
-            <td class="p-3 text-center">
-              ${row.evidencia
-              ? `<i class="fas fa-image text-blue-400 hover:text-blue-300 cursor-pointer text-lg"
-              onclick="verImagen('${row.evidencia}')"></i>`
-              : `<span class="text-gray-500">—</span>`
-              }
-            </td>
-
-            <td class="p-3">
-                <button onclick="editGI(${row.id})" class="text-blue-400 hover:text-blue-300 mr-2">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="deleteGI(${row.id})" class="text-red-400 hover:text-red-300">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
+      <tr class="border-b border-gray-700">
+        <td class="p-3">${row.id}</td>
+        <td class="p-3">${row.fecha}</td>
+        <td class="p-3">${row.titulo || '-'}</td>
+        <td class="p-3">$${row.costo}</td>
+        <td class="p-3">${row.tipo}</td>
+        <td class="p-3">${row.usuario}</td>
+        <td class="p-3 text-center">
+          ${row.evidencia
+            ? `<i class="fas fa-image text-blue-400 hover:text-blue-300 cursor-pointer text-lg"
+                 onclick="verImagen('${row.evidencia}')"></i>`
+            : `<span class="text-gray-500">—</span>`
+          }
+        </td>
+        <td class="p-3">
+          <button onclick="editGI(${row.id})" class="text-blue-400 hover:text-blue-300 mr-2">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button onclick="deleteGI(${row.id})" class="text-red-400 hover:text-red-300">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
     `;
-});
+  });
 
-
-    $("#tablaBody").html(html);
-    renderPagination(filteredData.length);
+  $("#tablaBody").html(html);
+  renderPagination(filteredData.length);
 }
+
 
 // =====================
 // Paginación
