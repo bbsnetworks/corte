@@ -1,3 +1,6 @@
+/* ===============================
+   ESTILOS EXISTENTES (TU CSS)
+================================= */
 .txt1>span{
     font-size: 3rem;
     color: var(--blue);
@@ -46,6 +49,13 @@ table.dataTable thead>tr>th.dt-orderable-asc, table.dataTable thead>tr>th.dt-ord
     font-size: xx-large;
     font-weight: 600;
 }
+.noc-card .noc-col{ min-width:0; }
+
+/* =========================================================
+   ⚠️ ESTILOS VIEJOS DE NOC1/NOC2
+   Los dejo, pero ahora los anulamos cuando uses .noc-card.
+   (Si ya migras a .noc-card, no dependes de esto)
+========================================================= */
 .noc1>:first-child,.noc2>:first-child{
     box-shadow: 0px 10px 46px 25px rgba(0,0,0,0.1);
     background: #16192f;
@@ -57,6 +67,7 @@ table.dataTable thead>tr>th.dt-orderable-asc, table.dataTable thead>tr>th.dt-ord
     min-width: 250px;
     text-align: center;
 }
+
 .txt-name>span{
     color: var(--orange);
     font-size: 4rem;
@@ -108,9 +119,13 @@ table.dataTable thead>tr>th.dt-orderable-asc, table.dataTable thead>tr>th.dt-ord
     font-weight: 500;
     color: var(--blue);
 }
+
+/* ⛔ Esto metía demasiado espacio. Se mantiene para lo viejo,
+   pero para .noc-card lo anulamos abajo. */
 .datos{
     margin: 50px 0px 50px 0px;
 }
+
 .txt-ganancias>span{
     font-size: 2.5rem;
     font-weight: 600;
@@ -129,22 +144,277 @@ table.dataTable thead>tr>th.dt-orderable-asc, table.dataTable thead>tr>th.dt-ord
 .qty-ganancia>span{
     font-size: 1.8rem;
     font-weight: 500;
-    color: var(--blue);  
+    color: var(--blue);
 }
 .txt-lista>span{
     font-size: 3rem;
     color: var(--blue);
 }
+
 .form-control,.form-select{
     background-color: #212529 !important;
     color: white;
 }
-@media (max-width: 991.98px) {
-    .dt-layout-table{
-        overflow-x: scroll;
-    }
-    .noc1>:first-child,.noc2>:first-child{
-    
-    height: auto;
+
+/* ===============================
+   ✅ NUEVAS CARDS NOC (PRO)
+   (Estas son las que usarás con .noc-card)
+================================= */
+
+#respuesta {
+  margin-top: 1.5rem;
+  padding: 0 1rem 2rem;
 }
+
+#respuesta .txt-lista{
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+
+/* separa las 2 cards y las hace “parejas” */
+#respuesta .col-lg-6 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-top: 1rem;
+}
+
+/* Card base */
+.noc-card{
+  width: 100%;
+  max-width: 920px;
+  border-radius: 28px;
+  padding: 34px 26px 28px;
+  position: relative;
+  overflow: hidden;
+
+  background: radial-gradient(1200px 700px at 50% 0%,
+      rgba(34, 65, 140, .35),
+      rgba(11, 16, 34, .95) 55%,
+      rgba(7, 10, 20, .98) 100%);
+
+  border: 1px solid rgba(255,255,255,.07);
+  box-shadow:
+    0 18px 60px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* brillo suave arriba */
+.noc-card::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: radial-gradient(600px 200px at 50% 0%,
+      rgba(255,140,0,.14),
+      transparent 60%);
+  pointer-events:none;
+}
+
+/* título grande NOC1/NOC2 */
+.noc-card .txt-name span{
+  display:block;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: clamp(52px, 5vw, 78px);
+  line-height: 1;
+  text-transform: uppercase;
+  color: #ff8a00;
+  text-align: center;
+  margin: 8px 0 20px;
+}
+
+/* mini separador */
+.noc-subdivider{
+  height: 1px;
+  background: rgba(255,255,255,.06);
+  margin: 16px auto 10px;
+  width: 85%;
+}
+
+/* sección de datos: 2 columnas en desktop, 1 en móvil */
+.noc-card .datos{
+  margin: 10px 0 0 0 !important;  /* ✅ anula tu .datos viejo */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 768px){
+  .noc-card .datos{
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+  }
+
+  /* línea divisoria solo en desktop */
+  .noc-card .datos > .col-md-6:first-child{
+    border-right: 1px solid rgba(255,255,255,.06);
+    padding-right: 18px;
+  }
+  .noc-card .datos > .col-md-6:last-child{
+    padding-left: 18px;
+  }
+}
+
+/* etiquetas */
+.noc-card .label-e span,
+.noc-card .label-e-bbs span{
+  display:block;
+  text-align:center;
+  font-weight: 700;
+  letter-spacing: .2px;
+  font-size: clamp(16px, 1.25vw, 19px);
+  color: rgba(255, 140, 0, .95);
+  margin-top: 10px;
+}
+
+/* montos */
+.noc-card .monto-e span,
+.noc-card .monto-e-bbs span,
+.noc-card .total-e span,
+.noc-card .total-e-bbs span{
+  display:block;
+  text-align:center;
+  font-weight: 800;
+  font-size: clamp(26px, 2.1vw, 36px);
+  color: #4f78ff;
+  margin-top: 6px;
+}
+
+/* rojos (gastos) */
+.noc-card .text-danger{
+  color: #ff3d57 !important;
+}
+
+/* diferencia */
+.noc-card .txt-total-e span,
+.noc-card .txt-total-e-bbs span{
+  display:block;
+  text-align:center;
+  font-weight: 900;
+  font-size: clamp(20px, 1.7vw, 28px);
+  color: #21c16b !important;
+  margin-top: 14px;
+}
+
+/* total ganancias sección */
+.noc-card .txt-ganancias span{
+  display:block;
+  text-align:center;
+  font-weight: 900;
+  font-size: clamp(28px, 2.4vw, 42px);
+  margin-top: 26px;
+  color: #21c16b !important;
+}
+
+.noc-card .total-ganancias span{
+  display:block;
+  text-align:center;
+  font-weight: 900;
+  font-size: clamp(34px, 3vw, 54px);
+  color: #4f78ff;
+  margin-top: 6px;
+}
+
+/* labels/qty del split 20/80 */
+.noc-card .label-ganancia span{
+  display:block;
+  text-align:center;
+  font-weight: 700;
+  font-size: clamp(16px, 1.35vw, 20px);
+  color: rgba(255,140,0,.95);
+  margin-top: 16px;
+}
+
+.noc-card .qty-ganancia span{
+  display:block;
+  text-align:center;
+  font-weight: 900;
+  font-size: clamp(22px, 1.9vw, 32px);
+  color: #4f78ff;
+  margin-top: 6px;
+}
+
+/* mejora de centrado general */
+.noc-card .centrar{
+  text-align: center;
+}
+
+/* Mejor padding en mobile */
+@media (max-width: 576px){
+  .noc-card{
+    padding: 26px 18px 22px;
+    border-radius: 22px;
+  }
+  .noc-subdivider{
+    width: 92%;
+  }
+}
+
+/* ===============================
+   ✅ FIX: evitar choque si quedó wrapper viejo .noc1/.noc2
+================================= */
+.noc1 > .noc-card,
+.noc2 > .noc-card{
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  border-radius: 28px !important;
+  background: radial-gradient(1200px 700px at 50% 0%,
+      rgba(34, 65, 140, .35),
+      rgba(11, 16, 34, .95) 55%,
+      rgba(7, 10, 20, .98) 100%) !important;
+}
+/* ===============================
+   FIX definitivo: .datos dentro de .noc-card
+   evita interferencia de Bootstrap .row/.col
+================================= */
+
+/* si por error queda class="row datos", anulamos flex */
+.noc-card .datos{
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 22px !important;
+  margin: 10px 0 0 0 !important;
+}
+
+/* 2 columnas en desktop */
+@media (min-width: 768px){
+  .noc-card .datos{
+    grid-template-columns: 1fr 1fr !important;
+    gap: 28px !important;
+  }
+}
+
+/* evita que Bootstrap gutters/metas afecten */
+.noc-card .datos::before,
+.noc-card .datos::after{
+  display:none !important;
+  content:none !important;
+}
+
+/* neutraliza padding lateral que meten columnas bootstrap dentro del grid */
+.noc-card .datos [class*="col-"]{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* línea divisoria entre columnas (solo si hay 2 columnas) */
+@media (min-width: 768px){
+  .noc-card .datos > :first-child{
+    border-right: 1px solid rgba(255,255,255,.06);
+    padding-right: 18px !important;
+  }
+  .noc-card .datos > :last-child{
+    padding-left: 18px !important;
+  }
+}
+
+/* Responsive extra para datatables */
+@media (max-width: 991.98px) {
+  .dt-layout-table{
+    overflow-x: scroll;
+  }
+  .noc1>:first-child,.noc2>:first-child{
+    height: auto;
+  }
 }

@@ -62,15 +62,17 @@ function cargarTabla(mes, year, nombrede, usuario, tipo, page = 1) {
     success: function (response) {
       ultimaRespuesta = response;
 
-      // Totales (sobre la página actual; si quieres totales del período completo tendrás que calcularlos con otra query)
-      const total = (response.ingreso || 0) - (response.gastos || 0);
+      const sumIngresos = Number(response.sum_ingresos ?? 0);
+      const sumGastos = Number(response.sum_gastos ?? 0);
+      const total = sumIngresos - sumGastos;
+
       $("#total-corte")
         .text(`$${total.toFixed(2)}`)
-        .css("color", total > 0 ? "green" : "red");
+        .css("color", total >= 0 ? "green" : "red");
 
       renderTable(response.data || []);
       renderPagination(response.page || 1, response.total_pages || 1);
-    }
+    },
   });
 }
 function listaGastos(mes, year) {
@@ -95,16 +97,16 @@ function listaGastos(mes, year) {
       var gastoE = response.gastoE;
       var ingresoB = response.ingresoB;
       var gastoB = response.gastoB;
-      var totalE = ingresoE - gastoE;  
+      var totalE = ingresoE - gastoE;
       var totalB = ingresoB - gastoB;
       var ganancias = totalE + totalB;
-      var qtyE = ganancias*0.20;
-      var qtyB = ganancias*0.80;
+      var qtyE = ganancias * 0.2;
+      var qtyB = ganancias * 0.8;
       var entrega;
-      if(totalB==0){
-        entrega=0;
-      }else{
-        entrega=qtyB-totalB+22500;
+      if (totalB == 0) {
+        entrega = 0;
+      } else {
+        entrega = qtyB - totalB + 22500;
       }
       //ingresos NOC1
       $("#ingreso-e").text("$" + response.ingresoE.toFixed(2));
@@ -116,21 +118,20 @@ function listaGastos(mes, year) {
       $("#pago-b").text("$" + totalB.toFixed(2));
 
       $("#total-noc1").text("$" + ganancias.toFixed(2));
-      
+
       $("#qty-e").text("$" + qtyE.toFixed(2));
       $("#qty-b").text("$" + qtyB.toFixed(2));
 
       $("#entrega").text("$" + entrega.toFixed(2));
 
       //ingresos NOC2
-     
+
       var ingresoBBS2 = response.ingresoBBS2;
-      var gastoBBS2 = response.gastoBBS2; 
+      var gastoBBS2 = response.gastoBBS2;
       var totalBBS2 = ingresoBBS2 - gastoBBS2;
 
-
       //var ganancias = totalE + totalB;
-    
+
       //var entrega = qtyB-totalB+22500;
 
       $("#ingreso-b-bbs").text("$" + response.ingresoBBS2.toFixed(2));
@@ -138,11 +139,27 @@ function listaGastos(mes, year) {
       $("#pago-b-bbs").text("$" + totalBBS2.toFixed(2));
 
       $("#total-noc2").text("$" + totalBBS2.toFixed(2));
-      
-    //   $("#qty-e").text("$" + qtyE.toFixed(2));
-    //   $("#qty-b").text("$" + qtyB.toFixed(2));
+
+      //   $("#qty-e").text("$" + qtyE.toFixed(2));
+      //   $("#qty-b").text("$" + qtyB.toFixed(2));
 
       $("#entrega").text("$" + entrega.toFixed(2));
+
+      // ===== Banco NOC1 =====
+      $("#ingreso-banco-noc1").text(
+        "$" + Number(response.ingresoBancoNOC1 || 0).toFixed(2),
+      );
+      $("#gasto-banco-noc1").text(
+        "$" + Number(response.gastoBancoNOC1 || 0).toFixed(2),
+      );
+
+      // ===== Banco NOC2 =====
+      $("#ingreso-banco-noc2").text(
+        "$" + Number(response.ingresoBancoNOC2 || 0).toFixed(2),
+      );
+      $("#gasto-banco-noc2").text(
+        "$" + Number(response.gastoBancoNOC2 || 0).toFixed(2),
+      );
     },
     error: function (jqXHR, textStatus, errorThrown) {
       console.log("Error:", textStatus, errorThrown);
@@ -154,29 +171,27 @@ $("#fecha").on("change", function () {
   // Obtener el valor del input
   var valorFecha = $("#fecha").val();
   var valorTipo;
-  var valorCuenta="";
+  var valorCuenta = "";
   //obtencion tipo
-  if($("#tipo").val()=="todos"){
-    valorTipo="todos";
-    }else
-  if($("#tipo").val()=="gasto"){
-    valorTipo="1";
-  }else if($("#tipo").val()=="ingreso"){
-    valorTipo="2";
-  }else if($("#tipo").val()=="ibanco"){
-    valorTipo="3";
-  }else if($("#tipo").val()=="gbanco"){
-    valorTipo="4";
+  if ($("#tipo").val() == "todos") {
+    valorTipo = "todos";
+  } else if ($("#tipo").val() == "gasto") {
+    valorTipo = "1";
+  } else if ($("#tipo").val() == "ingreso") {
+    valorTipo = "2";
+  } else if ($("#tipo").val() == "ibanco") {
+    valorTipo = "3";
+  } else if ($("#tipo").val() == "gbanco") {
+    valorTipo = "4";
   }
 
   //obtencion cuenta
-  if($("#cuenta").val()=="todos"){
-    valorCuenta="todos";
-    }else
-  if($("#cuenta").val()=="NOC1"){
-    valorCuenta="1";
-  }else if($("#cuenta").val()=="NOC2"){
-    valorCuenta="2";
+  if ($("#cuenta").val() == "todos") {
+    valorCuenta = "todos";
+  } else if ($("#cuenta").val() == "NOC1") {
+    valorCuenta = "1";
+  } else if ($("#cuenta").val() == "NOC2") {
+    valorCuenta = "2";
   }
   // Separar el valor en año y mes
   var yearFecha = valorFecha.split("-")[0]; // Obtener el año
@@ -189,71 +204,30 @@ $("#fecha").on("change", function () {
   cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo);
 });
 $("#cuenta").on("change", function () {
-   // Obtener el valor del input
-   var valorFecha = $("#fecha").val();
-   var valorTipo;
-   var valorCuenta="";
-   //obtencion tipo
-   if($("#tipo").val()=="todos"){
-     valorTipo="todos";
-     }else
-   if($("#tipo").val()=="gasto"){
-     valorTipo="1";
-   }else if($("#tipo").val()=="ingreso"){
-     valorTipo="2";
-   }else if($("#tipo").val()=="ibanco"){
-     valorTipo="3";
-   }else if($("#tipo").val()=="gbanco"){
-     valorTipo="4";
-   }
- 
-   //obtencion cuenta
-   if($("#cuenta").val()=="todos"){
-     valorCuenta="todos";
-     }else
-   if($("#cuenta").val()=="NOC1"){
-     valorCuenta="1";
-   }else if($("#cuenta").val()=="NOC2"){
-     valorCuenta="2";
-   }
-   // Separar el valor en año y mes
-   var yearFecha = valorFecha.split("-")[0]; // Obtener el año
-   var mesFecha = valorFecha.split("-")[1]; // Obtener el mes
- 
-   //console.log(valorTipo);
- 
-   // Llamada a la función listaGastos con los valores obtenidos
-   listaGastos(mesFecha, yearFecha);
-   cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo); 
-  
-});
-$("#tipo").on("change", function () {
   // Obtener el valor del input
   var valorFecha = $("#fecha").val();
   var valorTipo;
-  var valorCuenta="";
+  var valorCuenta = "";
   //obtencion tipo
-  if($("#tipo").val()=="todos"){
-    valorTipo="todos";
-    }else
-  if($("#tipo").val()=="gasto"){
-    valorTipo="1";
-  }else if($("#tipo").val()=="ingreso"){
-    valorTipo="2";
-  }else if($("#tipo").val()=="ibanco"){
-    valorTipo="3";
-  }else if($("#tipo").val()=="gbanco"){
-    valorTipo="4";
+  if ($("#tipo").val() == "todos") {
+    valorTipo = "todos";
+  } else if ($("#tipo").val() == "gasto") {
+    valorTipo = "1";
+  } else if ($("#tipo").val() == "ingreso") {
+    valorTipo = "2";
+  } else if ($("#tipo").val() == "ibanco") {
+    valorTipo = "3";
+  } else if ($("#tipo").val() == "gbanco") {
+    valorTipo = "4";
   }
 
   //obtencion cuenta
-  if($("#cuenta").val()=="todos"){
-    valorCuenta="todos";
-    }else
-  if($("#cuenta").val()=="NOC1"){
-    valorCuenta="1";
-  }else if($("#cuenta").val()=="NOC2"){
-    valorCuenta="2";
+  if ($("#cuenta").val() == "todos") {
+    valorCuenta = "todos";
+  } else if ($("#cuenta").val() == "NOC1") {
+    valorCuenta = "1";
+  } else if ($("#cuenta").val() == "NOC2") {
+    valorCuenta = "2";
   }
   // Separar el valor en año y mes
   var yearFecha = valorFecha.split("-")[0]; // Obtener el año
@@ -264,13 +238,48 @@ $("#tipo").on("change", function () {
   // Llamada a la función listaGastos con los valores obtenidos
   listaGastos(mesFecha, yearFecha);
   cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo);
-  
+});
+$("#tipo").on("change", function () {
+  // Obtener el valor del input
+  var valorFecha = $("#fecha").val();
+  var valorTipo;
+  var valorCuenta = "";
+  //obtencion tipo
+  if ($("#tipo").val() == "todos") {
+    valorTipo = "todos";
+  } else if ($("#tipo").val() == "gasto") {
+    valorTipo = "1";
+  } else if ($("#tipo").val() == "ingreso") {
+    valorTipo = "2";
+  } else if ($("#tipo").val() == "ibanco") {
+    valorTipo = "3";
+  } else if ($("#tipo").val() == "gbanco") {
+    valorTipo = "4";
+  }
+
+  //obtencion cuenta
+  if ($("#cuenta").val() == "todos") {
+    valorCuenta = "todos";
+  } else if ($("#cuenta").val() == "NOC1") {
+    valorCuenta = "1";
+  } else if ($("#cuenta").val() == "NOC2") {
+    valorCuenta = "2";
+  }
+  // Separar el valor en año y mes
+  var yearFecha = valorFecha.split("-")[0]; // Obtener el año
+  var mesFecha = valorFecha.split("-")[1]; // Obtener el mes
+
+  //console.log(valorTipo);
+
+  // Llamada a la función listaGastos con los valores obtenidos
+  listaGastos(mesFecha, yearFecha);
+  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo);
 });
 
 // ========= Render de tabla =========
 function renderTable(rows) {
   let html = "";
-  (rows || []).forEach(row => {
+  (rows || []).forEach((row) => {
     html += `
       <tr class="border-b border-gray-700">
         <td class="p-3">${row.id}</td>
@@ -294,8 +303,8 @@ function renderPagination(page, totalPages) {
 
   // Prev
   html += `<button onclick="changePage(${Math.max(1, page - 1)})"
-            class="px-3 py-1 rounded me-1 ${page === 1 ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600'}"
-            ${page === 1 ? 'disabled' : ''}>«</button>`;
+            class="px-3 py-1 rounded me-1 ${page === 1 ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-gray-700 text-gray-200 hover:bg-gray-600"}"
+            ${page === 1 ? "disabled" : ""}>«</button>`;
 
   // Números (compacto)
   const maxButtons = 7;
@@ -305,15 +314,15 @@ function renderPagination(page, totalPages) {
 
   for (let i = start; i <= end; i++) {
     html += `<button onclick="changePage(${i})"
-              class="px-3 py-1 rounded me-1 ${i === page ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}">
+              class="px-3 py-1 rounded me-1 ${i === page ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}">
               ${i}
             </button>`;
   }
 
   // Next
   html += `<button onclick="changePage(${Math.min(totalPages, page + 1)})"
-            class="px-3 py-1 rounded ${page === totalPages ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600'}"
-            ${page === totalPages ? 'disabled' : ''}>»</button>`;
+            class="px-3 py-1 rounded ${page === totalPages ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-gray-700 text-gray-200 hover:bg-gray-600"}"
+            ${page === totalPages ? "disabled" : ""}>»</button>`;
 
   $("#pagination").html(html);
 }
@@ -339,7 +348,14 @@ $("#fecha").on("change", function () {
 
   listaGastos(mesFecha, yearFecha);
   currentPage = 1;
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo, currentPage);
+  cargarTabla(
+    mesFecha,
+    yearFecha,
+    valorCuenta,
+    "todos",
+    valorTipo,
+    currentPage,
+  );
 });
 
 $("#cuenta").on("change", function () {
@@ -351,7 +367,14 @@ $("#cuenta").on("change", function () {
   const valorCuenta = obtenerCuentaSeleccionada();
 
   currentPage = 1;
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo, currentPage);
+  cargarTabla(
+    mesFecha,
+    yearFecha,
+    valorCuenta,
+    "todos",
+    valorTipo,
+    currentPage,
+  );
 });
 
 $("#tipo").on("change", function () {
@@ -363,27 +386,46 @@ $("#tipo").on("change", function () {
   const valorCuenta = obtenerCuentaSeleccionada();
 
   currentPage = 1;
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo, currentPage);
+  cargarTabla(
+    mesFecha,
+    yearFecha,
+    valorCuenta,
+    "todos",
+    valorTipo,
+    currentPage,
+  );
 });
 
 // ========= Búsqueda con debounce =========
-$("#buscar").on("input", debounce(function () {
-  const valorFecha = $("#fecha").val();
-  const yearFecha = valorFecha.split("-")[0];
-  const mesFecha = valorFecha.split("-")[1];
+$("#buscar").on(
+  "input",
+  debounce(function () {
+    const valorFecha = $("#fecha").val();
+    const yearFecha = valorFecha.split("-")[0];
+    const mesFecha = valorFecha.split("-")[1];
 
-  const valorTipo = obtenerTipoSeleccionado();
-  const valorCuenta = obtenerCuentaSeleccionada();
+    const valorTipo = obtenerTipoSeleccionado();
+    const valorCuenta = obtenerCuentaSeleccionada();
 
-  currentPage = 1; // reiniciar a página 1 al buscar
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo, currentPage);
-}, 400));
+    currentPage = 1; // reiniciar a página 1 al buscar
+    cargarTabla(
+      mesFecha,
+      yearFecha,
+      valorCuenta,
+      "todos",
+      valorTipo,
+      currentPage,
+    );
+  }, 400),
+);
 
 // Asegúrate de tener SheetJS y moment cargados
 // <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
 // <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-document.getElementById("btnExportExcel").addEventListener("click", exportarExcel);
+document
+  .getElementById("btnExportExcel")
+  .addEventListener("click", exportarExcel);
 
 async function exportarExcel(e) {
   e?.preventDefault?.();
@@ -435,25 +477,30 @@ async function exportarExcel(e) {
       processData: false,
       contentType: false,
       type: "POST",
-      dataType: "json"
+      dataType: "json",
     });
 
     const rows = resp?.data || [];
     if (!rows.length) {
-      Swal.fire("Sin datos", "No hay datos para exportar con el filtro actual", "warning");
+      Swal.fire(
+        "Sin datos",
+        "No hay datos para exportar con el filtro actual",
+        "warning",
+      );
       return;
     }
 
     // total: ingresos suman, gastos restan (igual que en tu tabla)
     let total = 0;
-    rows.forEach(r => {
+    rows.forEach((r) => {
       const costo = parseFloat(r.costo) || 0;
       const t = (r.tipo || "").toLowerCase();
-      if (t.includes("ingreso")) total += costo; else total -= costo;
+      if (t.includes("ingreso")) total += costo;
+      else total -= costo;
     });
 
     // datos legibles para Excel
-    const exportData = rows.map(r => ({
+    const exportData = rows.map((r) => ({
       ID: r.id,
       Título: r.nombre,
       Costo: Number(r.costo).toFixed(2),
@@ -461,7 +508,7 @@ async function exportarExcel(e) {
       Fecha: r.fecha,
       Cuenta: r.nombrede,
       Tipo: r.tipo,
-      Usuario: r.usuario
+      Usuario: r.usuario,
     }));
 
     // fila TOTAL
@@ -476,5 +523,3 @@ async function exportarExcel(e) {
     Swal.fire("Error", "No se pudo generar el Excel", "error");
   }
 }
-
-

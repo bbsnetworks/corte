@@ -56,6 +56,27 @@ if ($search !== "") {
 
 $whereSQL = implode(" AND ", $where);
 
+// ===== Totales globales (SIN LIMIT/OFFSET) =====
+$sumSQL = "
+  SELECT
+    COALESCE(SUM(CASE WHEN g.tipo IN (2,3) THEN g.costo ELSE 0 END), 0) AS sum_ingresos,
+    COALESCE(SUM(CASE WHEN g.tipo IN (1,4) THEN g.costo ELSE 0 END), 0) AS sum_gastos
+  FROM gastos g
+  INNER JOIN users u ON u.iduser = g.iduser
+  WHERE $whereSQL
+";
+$sumRes = $conexion->query($sumSQL);
+
+$sumIngresos = 0.0;
+$sumGastos   = 0.0;
+
+if ($sumRes && $sumRes->num_rows > 0) {
+    $r = $sumRes->fetch_assoc();
+    $sumIngresos = floatval($r['sum_ingresos']);
+    $sumGastos   = floatval($r['sum_gastos']);
+}
+
+
 // Conteo total para paginación
 $countSQL = "
   SELECT COUNT(*) AS total
@@ -132,5 +153,8 @@ echo json_encode([
     "page"         => $page,
     "per_page"     => $perPage,
     "total_rows"   => $totalRows,
-    "total_pages"  => $totalPages
+    "total_pages"  => $totalPages,
+    "sum_ingresos" => $sumIngresos,
+    "sum_gastos"   => $sumGastos,
+    "sum_total"    => ($sumIngresos - $sumGastos),
 ], JSON_UNESCAPED_UNICODE);
