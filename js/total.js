@@ -1,44 +1,217 @@
-// ========= Estado =========
+// =====================
+// Estado global
+// =====================
 let currentPage = 1;
 const rowsPerPage = 10;
 let ultimaRespuesta = { data: [], total_pages: 1, total_rows: 0 };
-// ========= Carga inicial =========
+
+// =====================
+// Inicialización
+// =====================
 let date = moment().format("YYYY-MM");
 document.getElementById("fecha").value = date;
+
 let mes = moment().format("MM");
 let year = moment().format("YYYY");
 
-cargarTabla(mes, year, "todos", "todos", "todos", currentPage);
+$(document).ready(function () {
+  cargarTabla(mes, year, "todos", "todos", "todos", currentPage);
+  listaGastos(mes, year);
+});
 
-// Mantengo tu listaGastos tal cual:
-listaGastos(mes, year);
-
-// ========= Utilidad: debounce =========
+// =====================
+// Utilidades
+// =====================
 function debounce(fn, delay = 400) {
   let t;
+
   return (...args) => {
     clearTimeout(t);
     t = setTimeout(() => fn(...args), delay);
   };
 }
-// ========= Lectura de filtros auxiliares =========
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatMoney(value) {
+  const number = Number(value) || 0;
+
+  return number.toLocaleString("es-MX", {
+    style: "currency",
+    currency: "MXN"
+  });
+}
+
+function setMoneyText(selector, value) {
+  $(selector).text(formatMoney(value));
+}
+
 function obtenerTipoSeleccionado() {
   const v = $("#tipo").val();
+
   if (v === "todos") return "todos";
   if (v === "gasto") return "1";
   if (v === "ingreso") return "2";
   if (v === "ibanco") return "3";
   if (v === "gbanco") return "4";
+
   return "todos";
 }
+
 function obtenerCuentaSeleccionada() {
   const v = $("#cuenta").val();
+
   if (v === "todos") return "todos";
   if (v === "NOC1") return "1";
   if (v === "NOC2") return "2";
+
   return "todos";
 }
-// ========= Core: cargarTabla con backend search/paginación =========
+
+function obtenerFechaSeleccionada() {
+  const valorFecha = $("#fecha").val();
+
+  if (!valorFecha) {
+    return {
+      yearFecha: moment().format("YYYY"),
+      mesFecha: moment().format("MM")
+    };
+  }
+
+  const [yearFecha, mesFecha] = valorFecha.split("-");
+
+  return {
+    yearFecha,
+    mesFecha
+  };
+}
+
+function recargarDatos(resetPage = true, recargarCards = false) {
+  const { yearFecha, mesFecha } = obtenerFechaSeleccionada();
+  const valorTipo = obtenerTipoSeleccionado();
+  const valorCuenta = obtenerCuentaSeleccionada();
+
+  if (resetPage) {
+    currentPage = 1;
+  }
+
+  if (recargarCards) {
+    listaGastos(mesFecha, yearFecha);
+  }
+
+  cargarTabla(
+    mesFecha,
+    yearFecha,
+    valorCuenta,
+    "todos",
+    valorTipo,
+    currentPage
+  );
+}
+
+function getTipoBadge(tipo) {
+  const label = String(tipo ?? "").trim();
+  const tipoLower = label.toLowerCase();
+
+  if (tipoLower.includes("gasto banco")) {
+    return `
+      <span class="inline-flex items-center gap-2 rounded-full border border-orange-300/20 bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-300">
+        <i class="fa-solid fa-building-columns"></i>
+        ${escapeHtml(label)}
+      </span>
+    `;
+  }
+
+  if (tipoLower.includes("ingreso banco")) {
+    return `
+      <span class="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-200">
+        <i class="fa-solid fa-building-columns"></i>
+        ${escapeHtml(label)}
+      </span>
+    `;
+  }
+
+  if (tipoLower.includes("gasto")) {
+    return `
+      <span class="inline-flex items-center gap-2 rounded-full border border-red-300/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-300">
+        <i class="fa-solid fa-arrow-trend-down"></i>
+        ${escapeHtml(label)}
+      </span>
+    `;
+  }
+
+  if (tipoLower.includes("ingreso")) {
+    return `
+      <span class="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
+        <i class="fa-solid fa-arrow-trend-up"></i>
+        ${escapeHtml(label)}
+      </span>
+    `;
+  }
+
+  return `
+    <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-cyan-100/70">
+      ${escapeHtml(label || "-")}
+    </span>
+  `;
+}
+
+function getCostoClass(tipo) {
+  const tipoLower = String(tipo ?? "").toLowerCase();
+
+  if (tipoLower.includes("gasto")) {
+    return "text-red-300";
+  }
+
+  return "text-emerald-300";
+}
+
+function getCostoSign(tipo) {
+  const tipoLower = String(tipo ?? "").toLowerCase();
+
+  if (tipoLower.includes("gasto")) {
+    return "-";
+  }
+
+  return "+";
+}
+
+function getCuentaBadge(nombrede) {
+  const label = String(nombrede ?? "").trim();
+
+  return `
+    <span class="inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-200">
+      <i class="fa-solid fa-network-wired"></i>
+      ${escapeHtml(label || "-")}
+    </span>
+  `;
+}
+
+function pintarTotalGeneral(total) {
+  const totalClass = total >= 0 ? "text-emerald-300" : "text-red-300";
+  const icon = total >= 0 ? "fa-arrow-trend-up" : "fa-arrow-trend-down";
+
+  $("#total-corte")
+    .removeClass("text-cyan-200 text-emerald-300 text-red-300")
+    .addClass(totalClass)
+    .html(`
+      <span class="inline-flex items-center gap-3">
+        <i class="fa-solid ${icon} text-2xl"></i>
+        ${formatMoney(total)}
+      </span>
+    `);
+}
+
+// =====================
+// Cargar tabla principal
+// =====================
 function cargarTabla(mes, year, nombrede, usuario, tipo, page = 1) {
   const search = ($("#buscar").val() || "").trim();
 
@@ -51,6 +224,15 @@ function cargarTabla(mes, year, nombrede, usuario, tipo, page = 1) {
   formData.append("search", search);
   formData.append("page", page);
   formData.append("per_page", rowsPerPage);
+
+  $("#cuerpo-table").html(`
+    <tr>
+      <td colspan="8" class="px-5 py-12 text-center text-cyan-100/70">
+        <i class="fa-solid fa-spinner fa-spin mr-2 text-cyan-300"></i>
+        Cargando movimientos...
+      </td>
+    </tr>
+  `);
 
   $.ajax({
     url: "../php/cargarTotal.php",
@@ -66,17 +248,37 @@ function cargarTabla(mes, year, nombrede, usuario, tipo, page = 1) {
       const sumGastos = Number(response.sum_gastos ?? 0);
       const total = sumIngresos - sumGastos;
 
-      $("#total-corte")
-        .text(`$${total.toFixed(2)}`)
-        .css("color", total >= 0 ? "green" : "red");
+      pintarTotalGeneral(total);
 
       renderTable(response.data || []);
       renderPagination(response.page || 1, response.total_pages || 1);
     },
+    error: function (xhr) {
+      console.error("Error al cargar total:", xhr.responseText);
+
+      $("#cuerpo-table").html(`
+        <tr>
+          <td colspan="8" class="px-5 py-12 text-center">
+            <div class="mx-auto mb-3 w-14 h-14 rounded-2xl bg-red-500/10 border border-red-400/20 flex items-center justify-center">
+              <i class="fa-solid fa-triangle-exclamation text-red-300 text-xl"></i>
+            </div>
+            <p class="font-bold text-white">No se pudo cargar la información</p>
+            <p class="mt-1 text-sm text-red-100/60">Revisa cargarTotal.php o la consola del navegador.</p>
+          </td>
+        </tr>
+      `);
+
+      $("#pagination").html("");
+      pintarTotalGeneral(0);
+    }
   });
 }
+
+// =====================
+// Cargar cards de ganancias
+// =====================
 function listaGastos(mes, year) {
-  var formData = new FormData();
+  const formData = new FormData();
   formData.append("mes", mes);
   formData.append("year", year);
 
@@ -88,341 +290,267 @@ function listaGastos(mes, year) {
     type: "POST",
     dataType: "json",
     success: function (response) {
-      //console.log(response);
-      // Insertar el HTML de la tabla
-      //$("#cuerpo-table").html(response.tableData);
+      const ingresoE = Number(response.ingresoE || 0);
+      const gastoE = Number(response.gastoE || 0);
+      const ingresoB = Number(response.ingresoB || 0);
+      const gastoB = Number(response.gastoB || 0);
 
-      // Acceder a las variables gastos e ingreso
-      var ingresoE = response.ingresoE;
-      var gastoE = response.gastoE;
-      var ingresoB = response.ingresoB;
-      var gastoB = response.gastoB;
-      var totalE = ingresoE - gastoE;
-      var totalB = ingresoB - gastoB;
-      var ganancias = totalE + totalB;
-      var qtyE = ganancias * 0.2;
-      var qtyB = ganancias * 0.8;
-      var entrega;
-      if (totalB == 0) {
-        entrega = 0;
-      } else {
+      const totalE = ingresoE - gastoE;
+      const totalB = ingresoB - gastoB;
+      const ganancias = totalE + totalB;
+
+      const qtyE = ganancias * 0.2;
+      const qtyB = ganancias * 0.8;
+
+      let entrega = 0;
+
+      if (totalB !== 0) {
         entrega = qtyB - totalB + 22500;
       }
-      //ingresos NOC1
-      $("#ingreso-e").text("$" + response.ingresoE.toFixed(2));
-      $("#gastos-e").text("$" + response.gastoE.toFixed(2));
-      $("#pago-e").text("$" + totalE.toFixed(2));
 
-      $("#ingreso-b").text("$" + response.ingresoB.toFixed(2));
-      $("#gastos-b").text("$" + response.gastoB.toFixed(2));
-      $("#pago-b").text("$" + totalB.toFixed(2));
+      setMoneyText("#ingreso-e", ingresoE);
+      setMoneyText("#gastos-e", gastoE);
+      setMoneyText("#pago-e", totalE);
 
-      $("#total-noc1").text("$" + ganancias.toFixed(2));
+      setMoneyText("#ingreso-b", ingresoB);
+      setMoneyText("#gastos-b", gastoB);
+      setMoneyText("#pago-b", totalB);
 
-      $("#qty-e").text("$" + qtyE.toFixed(2));
-      $("#qty-b").text("$" + qtyB.toFixed(2));
+      setMoneyText("#total-noc1", ganancias);
+      setMoneyText("#qty-e", qtyE);
+      setMoneyText("#qty-b", qtyB);
+      setMoneyText("#entrega", entrega);
 
-      $("#entrega").text("$" + entrega.toFixed(2));
+      const ingresoBBS2 = Number(response.ingresoBBS2 || 0);
+      const gastoBBS2 = Number(response.gastoBBS2 || 0);
+      const totalBBS2 = ingresoBBS2 - gastoBBS2;
 
-      //ingresos NOC2
+      setMoneyText("#ingreso-b-bbs", ingresoBBS2);
+      setMoneyText("#gastos-b-bbs", gastoBBS2);
+      setMoneyText("#pago-b-bbs", totalBBS2);
 
-      var ingresoBBS2 = response.ingresoBBS2;
-      var gastoBBS2 = response.gastoBBS2;
-      var totalBBS2 = ingresoBBS2 - gastoBBS2;
+      if ($("#total-noc2").length) {
+        setMoneyText("#total-noc2", totalBBS2);
+      }
 
-      //var ganancias = totalE + totalB;
-
-      //var entrega = qtyB-totalB+22500;
-
-      $("#ingreso-b-bbs").text("$" + response.ingresoBBS2.toFixed(2));
-      $("#gastos-b-bbs").text("$" + response.gastoBBS2.toFixed(2));
-      $("#pago-b-bbs").text("$" + totalBBS2.toFixed(2));
-
-      $("#total-noc2").text("$" + totalBBS2.toFixed(2));
-
-      //   $("#qty-e").text("$" + qtyE.toFixed(2));
-      //   $("#qty-b").text("$" + qtyB.toFixed(2));
-
-      $("#entrega").text("$" + entrega.toFixed(2));
-
-      // ===== Banco NOC1 =====
-      $("#ingreso-banco-noc1").text(
-        "$" + Number(response.ingresoBancoNOC1 || 0).toFixed(2),
-      );
-      $("#gasto-banco-noc1").text(
-        "$" + Number(response.gastoBancoNOC1 || 0).toFixed(2),
-      );
-
-      // ===== Banco NOC2 =====
-      $("#ingreso-banco-noc2").text(
-        "$" + Number(response.ingresoBancoNOC2 || 0).toFixed(2),
-      );
-      $("#gasto-banco-noc2").text(
-        "$" + Number(response.gastoBancoNOC2 || 0).toFixed(2),
-      );
+      setMoneyText("#ingreso-banco-noc1", Number(response.ingresoBancoNOC1 || 0));
+      setMoneyText("#gasto-banco-noc1", Number(response.gastoBancoNOC1 || 0));
+      setMoneyText("#ingreso-banco-noc2", Number(response.ingresoBancoNOC2 || 0));
+      setMoneyText("#gasto-banco-noc2", Number(response.gastoBancoNOC2 || 0));
     },
     error: function (jqXHR, textStatus, errorThrown) {
-      console.log("Error:", textStatus, errorThrown);
-    },
+      console.log("Error ganancias:", textStatus, errorThrown);
+    }
   });
 }
 
-$("#fecha").on("change", function () {
-  // Obtener el valor del input
-  var valorFecha = $("#fecha").val();
-  var valorTipo;
-  var valorCuenta = "";
-  //obtencion tipo
-  if ($("#tipo").val() == "todos") {
-    valorTipo = "todos";
-  } else if ($("#tipo").val() == "gasto") {
-    valorTipo = "1";
-  } else if ($("#tipo").val() == "ingreso") {
-    valorTipo = "2";
-  } else if ($("#tipo").val() == "ibanco") {
-    valorTipo = "3";
-  } else if ($("#tipo").val() == "gbanco") {
-    valorTipo = "4";
-  }
-
-  //obtencion cuenta
-  if ($("#cuenta").val() == "todos") {
-    valorCuenta = "todos";
-  } else if ($("#cuenta").val() == "NOC1") {
-    valorCuenta = "1";
-  } else if ($("#cuenta").val() == "NOC2") {
-    valorCuenta = "2";
-  }
-  // Separar el valor en año y mes
-  var yearFecha = valorFecha.split("-")[0]; // Obtener el año
-  var mesFecha = valorFecha.split("-")[1]; // Obtener el mes
-
-  //console.log(valorTipo);
-
-  // Llamada a la función listaGastos con los valores obtenidos
-  listaGastos(mesFecha, yearFecha);
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo);
-});
-$("#cuenta").on("change", function () {
-  // Obtener el valor del input
-  var valorFecha = $("#fecha").val();
-  var valorTipo;
-  var valorCuenta = "";
-  //obtencion tipo
-  if ($("#tipo").val() == "todos") {
-    valorTipo = "todos";
-  } else if ($("#tipo").val() == "gasto") {
-    valorTipo = "1";
-  } else if ($("#tipo").val() == "ingreso") {
-    valorTipo = "2";
-  } else if ($("#tipo").val() == "ibanco") {
-    valorTipo = "3";
-  } else if ($("#tipo").val() == "gbanco") {
-    valorTipo = "4";
-  }
-
-  //obtencion cuenta
-  if ($("#cuenta").val() == "todos") {
-    valorCuenta = "todos";
-  } else if ($("#cuenta").val() == "NOC1") {
-    valorCuenta = "1";
-  } else if ($("#cuenta").val() == "NOC2") {
-    valorCuenta = "2";
-  }
-  // Separar el valor en año y mes
-  var yearFecha = valorFecha.split("-")[0]; // Obtener el año
-  var mesFecha = valorFecha.split("-")[1]; // Obtener el mes
-
-  //console.log(valorTipo);
-
-  // Llamada a la función listaGastos con los valores obtenidos
-  listaGastos(mesFecha, yearFecha);
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo);
-});
-$("#tipo").on("change", function () {
-  // Obtener el valor del input
-  var valorFecha = $("#fecha").val();
-  var valorTipo;
-  var valorCuenta = "";
-  //obtencion tipo
-  if ($("#tipo").val() == "todos") {
-    valorTipo = "todos";
-  } else if ($("#tipo").val() == "gasto") {
-    valorTipo = "1";
-  } else if ($("#tipo").val() == "ingreso") {
-    valorTipo = "2";
-  } else if ($("#tipo").val() == "ibanco") {
-    valorTipo = "3";
-  } else if ($("#tipo").val() == "gbanco") {
-    valorTipo = "4";
-  }
-
-  //obtencion cuenta
-  if ($("#cuenta").val() == "todos") {
-    valorCuenta = "todos";
-  } else if ($("#cuenta").val() == "NOC1") {
-    valorCuenta = "1";
-  } else if ($("#cuenta").val() == "NOC2") {
-    valorCuenta = "2";
-  }
-  // Separar el valor en año y mes
-  var yearFecha = valorFecha.split("-")[0]; // Obtener el año
-  var mesFecha = valorFecha.split("-")[1]; // Obtener el mes
-
-  //console.log(valorTipo);
-
-  // Llamada a la función listaGastos con los valores obtenidos
-  listaGastos(mesFecha, yearFecha);
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo);
-});
-
-// ========= Render de tabla =========
+// =====================
+// Render de tabla
+// =====================
 function renderTable(rows) {
   let html = "";
-  (rows || []).forEach((row) => {
+
+  if (!rows || rows.length === 0) {
+    $("#cuerpo-table").html(`
+      <tr>
+        <td colspan="8" class="px-5 py-14 text-center">
+          <div class="mx-auto mb-4 w-16 h-16 rounded-2xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center">
+            <i class="fa-solid fa-folder-open text-cyan-300 text-2xl"></i>
+          </div>
+          <p class="font-bold text-white text-lg">No hay movimientos para mostrar</p>
+          <p class="mt-1 text-sm text-cyan-100/60">Intenta cambiar la fecha, cuenta, tipo o búsqueda.</p>
+        </td>
+      </tr>
+    `);
+    return;
+  }
+
+  rows.forEach((row) => {
+    const id = escapeHtml(row.id);
+    const nombre = escapeHtml(row.nombre || "-");
+    const descripcion = escapeHtml(row.descripcion || "");
+    const fecha = escapeHtml(row.fecha || "-");
+    const nombrede = escapeHtml(row.nombrede || "-");
+    const usuario = escapeHtml(row.usuario || "-");
+    const tipo = row.tipo || "-";
+    const costo = Number(row.costo || 0);
+
     html += `
-      <tr class="border-b border-gray-700">
-        <td class="p-3">${row.id}</td>
-        <td class="p-3">${row.nombre}</td>
-        <td class="p-3">$${Number(row.costo).toFixed(2)}</td>
-        <td class="p-3">${row.descripcion ?? ""}</td>
-        <td class="p-3">${row.fecha}</td>
-        <td class="p-3">${row.nombrede}</td>
-        <td class="p-3">${row.tipo}</td>
-        <td class="p-3">${row.usuario}</td>
+      <tr class="group border-b border-cyan-400/10 bg-[#071322]/40 hover:bg-cyan-400/[0.06] transition">
+        
+        <td class="px-5 py-4 align-middle">
+          <span class="inline-flex items-center justify-center min-w-11 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1.5 text-sm font-black text-cyan-100 shadow-sm shadow-cyan-950/30">
+            #${id}
+          </span>
+        </td>
+
+        <td class="px-5 py-4 align-middle">
+          <p class="font-bold text-white max-w-[240px] truncate" title="${nombre}">
+            ${nombre}
+          </p>
+          <p class="mt-1 text-xs text-cyan-100/45">
+            Movimiento registrado
+          </p>
+        </td>
+
+        <td class="px-5 py-4 align-middle whitespace-nowrap">
+          <span class="font-extrabold ${getCostoClass(tipo)}">
+            ${getCostoSign(tipo)} ${formatMoney(costo)}
+          </span>
+        </td>
+
+        <td class="px-5 py-4 align-middle">
+          <p class="max-w-[340px] truncate text-sm text-cyan-100/75" title="${descripcion}">
+            ${descripcion || "Sin descripción"}
+          </p>
+        </td>
+
+        <td class="px-5 py-4 align-middle text-sm text-cyan-100/80 whitespace-nowrap">
+          <i class="fa-solid fa-calendar-day mr-2 text-cyan-300/60"></i>
+          ${fecha}
+        </td>
+
+        <td class="px-5 py-4 align-middle whitespace-nowrap">
+          ${getCuentaBadge(nombrede)}
+        </td>
+
+        <td class="px-5 py-4 align-middle whitespace-nowrap">
+          ${getTipoBadge(tipo)}
+        </td>
+
+        <td class="px-5 py-4 align-middle text-sm text-cyan-100/80 whitespace-nowrap">
+          <i class="fa-solid fa-user mr-2 text-cyan-300/60"></i>
+          ${usuario}
+        </td>
+
       </tr>
     `;
   });
+
   $("#cuerpo-table").html(html);
 }
 
-// ========= Paginación =========
+// =====================
+// Paginación
+// =====================
 function renderPagination(page, totalPages) {
   currentPage = page;
+
   let html = "";
 
-  // Prev
-  html += `<button onclick="changePage(${Math.max(1, page - 1)})"
-            class="px-3 py-1 rounded me-1 ${page === 1 ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-gray-700 text-gray-200 hover:bg-gray-600"}"
-            ${page === 1 ? "disabled" : ""}>«</button>`;
+  if (totalPages <= 1) {
+    $("#pagination").html("");
+    return;
+  }
 
-  // Números (compacto)
+  html += `
+    <button type="button"
+      onclick="changePage(${Math.max(1, page - 1)})"
+      ${page === 1 ? "disabled" : ""}
+      class="inline-flex items-center justify-center min-w-10 h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-bold text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+  `;
+
   const maxButtons = 7;
   let start = Math.max(1, page - 3);
   let end = Math.min(totalPages, start + maxButtons - 1);
-  if (end - start + 1 < maxButtons) start = Math.max(1, end - maxButtons + 1);
 
-  for (let i = start; i <= end; i++) {
-    html += `<button onclick="changePage(${i})"
-              class="px-3 py-1 rounded me-1 ${i === page ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}">
-              ${i}
-            </button>`;
+  if (end - start + 1 < maxButtons) {
+    start = Math.max(1, end - maxButtons + 1);
   }
 
-  // Next
-  html += `<button onclick="changePage(${Math.min(totalPages, page + 1)})"
-            class="px-3 py-1 rounded ${page === totalPages ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-gray-700 text-gray-200 hover:bg-gray-600"}"
-            ${page === totalPages ? "disabled" : ""}>»</button>`;
+  if (start > 1) {
+    html += `
+      <button type="button"
+        onclick="changePage(1)"
+        class="inline-flex items-center justify-center min-w-10 h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-bold text-cyan-100 hover:bg-white/10 transition">
+        1
+      </button>
+    `;
+
+    if (start > 2) {
+      html += `
+        <span class="inline-flex items-center justify-center min-w-10 h-10 text-cyan-100/40">
+          ...
+        </span>
+      `;
+    }
+  }
+
+  for (let i = start; i <= end; i++) {
+    html += `
+      <button type="button"
+        onclick="changePage(${i})"
+        class="inline-flex items-center justify-center min-w-10 h-10 rounded-xl px-3 text-sm font-bold transition
+        ${i === page
+          ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-blue-950/40"
+          : "border border-white/10 bg-white/5 text-cyan-100 hover:bg-white/10"}">
+        ${i}
+      </button>
+    `;
+  }
+
+  if (end < totalPages) {
+    if (end < totalPages - 1) {
+      html += `
+        <span class="inline-flex items-center justify-center min-w-10 h-10 text-cyan-100/40">
+          ...
+        </span>
+      `;
+    }
+
+    html += `
+      <button type="button"
+        onclick="changePage(${totalPages})"
+        class="inline-flex items-center justify-center min-w-10 h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-bold text-cyan-100 hover:bg-white/10 transition">
+        ${totalPages}
+      </button>
+    `;
+  }
+
+  html += `
+    <button type="button"
+      onclick="changePage(${Math.min(totalPages, page + 1)})"
+      ${page === totalPages ? "disabled" : ""}
+      class="inline-flex items-center justify-center min-w-10 h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-bold text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  `;
 
   $("#pagination").html(html);
 }
 
 function changePage(page) {
-  const valorFecha = $("#fecha").val();
-  const yearFecha = valorFecha.split("-")[0];
-  const mesFecha = valorFecha.split("-")[1];
-
-  const valorTipo = obtenerTipoSeleccionado();
-  const valorCuenta = obtenerCuentaSeleccionada();
-
-  cargarTabla(mesFecha, yearFecha, valorCuenta, "todos", valorTipo, page);
+  currentPage = page;
+  recargarDatos(false, false);
 }
-// ========= Eventos de filtros =========
+
+// =====================
+// Eventos de filtros
+// =====================
 $("#fecha").on("change", function () {
-  const valorFecha = $("#fecha").val();
-  const yearFecha = valorFecha.split("-")[0];
-  const mesFecha = valorFecha.split("-")[1];
-
-  const valorTipo = obtenerTipoSeleccionado();
-  const valorCuenta = obtenerCuentaSeleccionada();
-
-  listaGastos(mesFecha, yearFecha);
-  currentPage = 1;
-  cargarTabla(
-    mesFecha,
-    yearFecha,
-    valorCuenta,
-    "todos",
-    valorTipo,
-    currentPage,
-  );
+  recargarDatos(true, true);
 });
 
 $("#cuenta").on("change", function () {
-  const valorFecha = $("#fecha").val();
-  const yearFecha = valorFecha.split("-")[0];
-  const mesFecha = valorFecha.split("-")[1];
-
-  const valorTipo = obtenerTipoSeleccionado();
-  const valorCuenta = obtenerCuentaSeleccionada();
-
-  currentPage = 1;
-  cargarTabla(
-    mesFecha,
-    yearFecha,
-    valorCuenta,
-    "todos",
-    valorTipo,
-    currentPage,
-  );
+  recargarDatos(true, false);
 });
 
 $("#tipo").on("change", function () {
-  const valorFecha = $("#fecha").val();
-  const yearFecha = valorFecha.split("-")[0];
-  const mesFecha = valorFecha.split("-")[1];
-
-  const valorTipo = obtenerTipoSeleccionado();
-  const valorCuenta = obtenerCuentaSeleccionada();
-
-  currentPage = 1;
-  cargarTabla(
-    mesFecha,
-    yearFecha,
-    valorCuenta,
-    "todos",
-    valorTipo,
-    currentPage,
-  );
+  recargarDatos(true, false);
 });
 
-// ========= Búsqueda con debounce =========
 $("#buscar").on(
   "input",
   debounce(function () {
-    const valorFecha = $("#fecha").val();
-    const yearFecha = valorFecha.split("-")[0];
-    const mesFecha = valorFecha.split("-")[1];
-
-    const valorTipo = obtenerTipoSeleccionado();
-    const valorCuenta = obtenerCuentaSeleccionada();
-
-    currentPage = 1; // reiniciar a página 1 al buscar
-    cargarTabla(
-      mesFecha,
-      yearFecha,
-      valorCuenta,
-      "todos",
-      valorTipo,
-      currentPage,
-    );
-  }, 400),
+    recargarDatos(true, false);
+  }, 400)
 );
 
-// Asegúrate de tener SheetJS y moment cargados
-// <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
-// <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+// =====================
+// Exportar Excel
+// =====================
 document
   .getElementById("btnExportExcel")
   .addEventListener("click", exportarExcel);
@@ -431,6 +559,7 @@ async function exportarExcel(e) {
   e?.preventDefault?.();
 
   const valorFecha = $("#fecha").val();
+
   if (!valorFecha) {
     Swal.fire("Falta fecha", "Selecciona un mes/año primero", "warning");
     return;
@@ -439,28 +568,9 @@ async function exportarExcel(e) {
   const [yearFecha, mesFecha] = valorFecha.split("-");
   const search = ($("#buscar").val() || "").trim();
 
-  // mismas funciones de mapeo que usas en tu código
-  const obtenerTipoSeleccionado = () => {
-    const v = $("#tipo").val();
-    if (v === "todos") return "todos";
-    if (v === "gasto") return "1";
-    if (v === "ingreso") return "2";
-    if (v === "ibanco") return "3";
-    if (v === "gbanco") return "4";
-    return "todos";
-  };
-  const obtenerCuentaSeleccionada = () => {
-    const v = $("#cuenta").val();
-    if (v === "todos") return "todos";
-    if (v === "NOC1") return "1";
-    if (v === "NOC2") return "2";
-    return "todos";
-  };
-
   const valorTipo = obtenerTipoSeleccionado();
   const valorCuenta = obtenerCuentaSeleccionada();
 
-  // pedir TODO al backend (sin LIMIT)
   const formData = new FormData();
   formData.append("mes", mesFecha);
   formData.append("year", yearFecha);
@@ -468,38 +578,51 @@ async function exportarExcel(e) {
   formData.append("usuario", "todos");
   formData.append("tipo", valorTipo);
   formData.append("search", search);
-  formData.append("export", 1); // <<< señal para no aplicar LIMIT/OFFSET en PHP
+  formData.append("export", 1);
 
   try {
+    Swal.fire({
+      title: "Generando Excel...",
+      text: "Espera un momento.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     const resp = await $.ajax({
       url: "../php/cargarTotal.php",
       data: formData,
       processData: false,
       contentType: false,
       type: "POST",
-      dataType: "json",
+      dataType: "json"
     });
 
     const rows = resp?.data || [];
+
     if (!rows.length) {
       Swal.fire(
         "Sin datos",
         "No hay datos para exportar con el filtro actual",
-        "warning",
+        "warning"
       );
       return;
     }
 
-    // total: ingresos suman, gastos restan (igual que en tu tabla)
     let total = 0;
+
     rows.forEach((r) => {
       const costo = parseFloat(r.costo) || 0;
-      const t = (r.tipo || "").toLowerCase();
-      if (t.includes("ingreso")) total += costo;
-      else total -= costo;
+      const t = String(r.tipo || "").toLowerCase();
+
+      if (t.includes("ingreso")) {
+        total += costo;
+      } else {
+        total -= costo;
+      }
     });
 
-    // datos legibles para Excel
     const exportData = rows.map((r) => ({
       ID: r.id,
       Título: r.nombre,
@@ -508,16 +631,21 @@ async function exportarExcel(e) {
       Fecha: r.fecha,
       Cuenta: r.nombrede,
       Tipo: r.tipo,
-      Usuario: r.usuario,
+      Usuario: r.usuario
     }));
 
-    // fila TOTAL
-    exportData.push({ Título: "TOTAL", Costo: total.toFixed(2) });
+    exportData.push({
+      Título: "TOTAL",
+      Costo: total.toFixed(2)
+    });
 
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
+
     XLSX.utils.book_append_sheet(wb, ws, "Corte");
     XLSX.writeFile(wb, `Corte_${moment().format("YYYY-MM-DD_HH-mm")}.xlsx`);
+
+    Swal.fire("Excel generado", "El archivo se descargó correctamente.", "success");
   } catch (err) {
     console.error(err);
     Swal.fire("Error", "No se pudo generar el Excel", "error");

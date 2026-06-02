@@ -19,7 +19,7 @@ $tipoUsuario = $_SESSION['tipo'] ?? '';
         <a href="<?= $base ?>/gastos/index.php" onclick="closeSidebar()" class="flex items-center gap-2 text-white hover:text-blue-400">
           <i class="fa-solid fa-plus"></i> <span>Agregar Gasto/Ingreso</span>
         </a>
-        <?php  if($tipoUsuario=='root'){ ?>
+        <?php  if($tipoUsuario ==='root'){ ?>
         <a href="<?= $base ?>/table/index.php" class="flex items-center gap-2 text-white hover:text-blue-400">
           <i class="fa-solid fa-list"></i> <span>Lista de Gastos/Ingresos</span>
         </a>
