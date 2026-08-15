@@ -51,8 +51,6 @@ if (!isset($_SESSION['username'])) {
   </div>
 
   <script src="js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://momentjs.com/downloads/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="js/bootstrapval.js"></script>
   <script src="js/booststraptoogletips.js"></script>

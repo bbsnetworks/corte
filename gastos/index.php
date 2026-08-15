@@ -39,7 +39,8 @@ if (!isset($_SESSION['username'])) {
     <main class="flex-1 p-4 sm:p-6 lg:p-8">
 
       <!-- Encabezado principal -->
-      <section class="mb-8 rounded-[28px] border border-cyan-400/20 bg-[#061b3b]/80 shadow-2xl shadow-blue-950/40 overflow-hidden">
+      <section
+        class="mb-8 rounded-[28px] border border-cyan-400/20 bg-[#061b3b]/80 shadow-2xl shadow-blue-950/40 overflow-hidden">
         <div class="relative p-6 sm:p-8">
 
           <!-- Brillos decorativos -->
@@ -49,7 +50,8 @@ if (!isset($_SESSION['username'])) {
           <div class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
             <div class="flex items-start gap-4">
-              <div class="w-14 h-14 rounded-2xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center shadow-lg shadow-cyan-950/40">
+              <div
+                class="w-14 h-14 rounded-2xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center shadow-lg shadow-cyan-950/40">
                 <i class="fa-solid fa-receipt text-cyan-300 text-2xl"></i>
               </div>
 
@@ -64,17 +66,16 @@ if (!isset($_SESSION['username'])) {
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">
-              <button type="button"
-                onclick="limpiarFormularioGasto()"
+              <button type="button" onclick="limpiarFormularioGasto()"
                 class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white hover:bg-white/10 transition">
                 <i class="fa-solid fa-rotate-left"></i>
                 Limpiar formulario
               </button>
 
-              <button type="button" id="ingresar" onclick="submitForm()"
-                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-900/40 hover:from-cyan-400 hover:to-blue-500 transition">
+              <button type="submit" form="uploadForm" data-guardar-movimiento
+                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-900/40 hover:from-cyan-400 hover:to-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-check"></i>
-                Ingresar
+                <span>Ingresar</span>
               </button>
             </div>
 
@@ -83,7 +84,8 @@ if (!isset($_SESSION['username'])) {
       </section>
 
       <!-- Contenedor del formulario -->
-      <section class="rounded-[28px] border border-blue-400/20 bg-[#06152d]/90 shadow-2xl shadow-black/30 p-4 sm:p-6 lg:p-7">
+      <section
+        class="rounded-[28px] border border-blue-400/20 bg-[#06152d]/90 shadow-2xl shadow-black/30 p-4 sm:p-6 lg:p-7">
 
         <!-- Título de sección -->
         <div class="mb-6 rounded-2xl border border-cyan-400/20 bg-[#062a52]/70 px-5 py-4">
@@ -154,7 +156,8 @@ if (!isset($_SESSION['username'])) {
                 Tipo de movimiento
               </label>
               <div class="relative">
-                <i class="fa-solid fa-arrow-right-arrow-left absolute left-4 top-1/2 -translate-y-1/2 text-cyan-200/50"></i>
+                <i
+                  class="fa-solid fa-arrow-right-arrow-left absolute left-4 top-1/2 -translate-y-1/2 text-cyan-200/50"></i>
                 <select id="tipo" name="tipo"
                   class="w-full rounded-2xl bg-[#101b31] border border-white/15 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 outline-none pl-11 pr-4 py-3 text-white transition appearance-none">
                   <option value="1">Gasto</option>
@@ -162,7 +165,8 @@ if (!isset($_SESSION['username'])) {
                   <option value="3">Banco Ingreso</option>
                   <option value="4">Banco Gasto</option>
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-cyan-200/50 pointer-events-none"></i>
+                <i
+                  class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-cyan-200/50 pointer-events-none"></i>
               </div>
             </div>
 
@@ -180,7 +184,8 @@ if (!isset($_SESSION['username'])) {
                     <option value="2">NOC2</option>
                   <?php } ?>
                 </select>
-                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-cyan-200/50 pointer-events-none"></i>
+                <i
+                  class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-cyan-200/50 pointer-events-none"></i>
               </div>
             </div>
 
@@ -209,60 +214,58 @@ if (!isset($_SESSION['username'])) {
 
                 <div class="space-y-4">
 
-  <!-- Área para seleccionar archivo -->
-  <label for="file"
-    id="file-drop-area"
-    class="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-cyan-300/30 bg-[#101b31] px-4 py-8 text-center cursor-pointer hover:bg-[#12213c] transition">
+                  <!-- Área para seleccionar archivo -->
+                  <label for="file" id="file-drop-area"
+                    class="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-cyan-300/30 bg-[#101b31] px-4 py-8 text-center cursor-pointer hover:bg-[#12213c] transition">
 
-    <div class="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center">
-      <i class="fa-solid fa-cloud-arrow-up text-cyan-300 text-xl"></i>
-    </div>
+                    <div
+                      class="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center">
+                      <i class="fa-solid fa-cloud-arrow-up text-cyan-300 text-xl"></i>
+                    </div>
 
-    <div>
-      <p class="font-semibold text-white">Seleccionar archivo</p>
-      <p class="text-sm text-cyan-100/60">Comprobante, imagen o evidencia</p>
-    </div>
+                    <div>
+                      <p class="font-semibold text-white">Seleccionar archivo</p>
+                      <p class="text-sm text-cyan-100/60">Comprobante, imagen o evidencia</p>
+                    </div>
 
-    <input type="file" id="file" name="file" class="hidden" accept="image/*,.pdf">
-  </label>
+                    <input type="file" id="file" name="file" class="hidden" accept="image/*,.pdf">
+                  </label>
 
-  <!-- Vista previa del archivo -->
-  <div id="file-preview"
-    class="hidden rounded-2xl border border-cyan-400/20 bg-[#101b31] p-4">
+                  <!-- Vista previa del archivo -->
+                  <div id="file-preview" class="hidden rounded-2xl border border-cyan-400/20 bg-[#101b31] p-4">
 
-    <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
 
-      <!-- Preview imagen / icono -->
-      <div id="preview-visual"
-        class="w-full sm:w-32 h-32 rounded-xl border border-white/10 bg-[#071322] flex items-center justify-center overflow-hidden">
-      </div>
+                      <!-- Preview imagen / icono -->
+                      <div id="preview-visual"
+                        class="w-full sm:w-32 h-32 rounded-xl border border-white/10 bg-[#071322] flex items-center justify-center overflow-hidden">
+                      </div>
 
-      <!-- Datos del archivo -->
-      <div class="flex-1 min-w-0">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p class="text-sm text-cyan-100/60">Archivo seleccionado</p>
-            <h4 id="preview-name" class="font-bold text-white truncate"></h4>
-            <p id="preview-info" class="mt-1 text-sm text-cyan-100/70"></p>
-          </div>
+                      <!-- Datos del archivo -->
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="min-w-0">
+                            <p class="text-sm text-cyan-100/60">Archivo seleccionado</p>
+                            <h4 id="preview-name" class="font-bold text-white truncate"></h4>
+                            <p id="preview-info" class="mt-1 text-sm text-cyan-100/70"></p>
+                          </div>
 
-          <button type="button"
-            id="remove-file"
-            class="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-red-500/10 border border-red-400/20 text-red-300 hover:bg-red-500/20 transition"
-            title="Eliminar archivo">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
+                          <button type="button" id="remove-file"
+                            class="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-red-500/10 border border-red-400/20 text-red-300 hover:bg-red-500/20 transition"
+                            title="Eliminar archivo">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
 
-        <p class="mt-3 text-xs text-cyan-100/50">
-          Si seleccionaste el archivo incorrecto, puedes eliminarlo y subir otro.
-        </p>
-      </div>
+                        <p class="mt-3 text-xs text-cyan-100/50">
+                          Si seleccionaste el archivo incorrecto, puedes eliminarlo y subir otro.
+                        </p>
+                      </div>
 
-    </div>
-  </div>
+                    </div>
+                  </div>
 
-</div>
+                </div>
               </div>
 
               <!-- Usuario -->
@@ -294,17 +297,16 @@ if (!isset($_SESSION['username'])) {
           <!-- Botones inferiores -->
           <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
 
-            <button type="button"
-              onclick="limpiarFormularioGasto()"
+            <button type="button" onclick="limpiarFormularioGasto()"
               class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white hover:bg-white/10 transition">
               <i class="fa-solid fa-broom"></i>
               Limpiar
             </button>
 
-            <button type="button" onclick="submitForm()"
-              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-8 py-3 font-bold text-white shadow-lg shadow-blue-950/50 hover:from-cyan-400 hover:to-blue-500 transition">
+            <button type="submit" data-guardar-movimiento
+              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-8 py-3 font-bold text-white shadow-lg shadow-blue-950/50 hover:from-cyan-400 hover:to-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fa-solid fa-floppy-disk"></i>
-              Guardar movimiento
+              <span>Guardar movimiento</span>
             </button>
 
           </div>
