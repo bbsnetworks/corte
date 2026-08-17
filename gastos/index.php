@@ -123,7 +123,8 @@ if (!isset($_SESSION['username'])) {
               </label>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-200/70 font-bold">$</span>
-                <input type="number" id="costo" name="costo" value="1" min="1" pattern="^[0-9]+" required
+                <input type="number" id="costo" name="costo" value="1.00" min="1" step="0.01" inputmode="decimal"
+                  required
                   class="w-full rounded-2xl bg-[#101b31] border border-white/15 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 outline-none pl-9 pr-4 py-3 text-white placeholder:text-blue-200/60 transition">
               </div>
             </div>
