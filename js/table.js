@@ -14,104 +14,102 @@ let dataRegistros = [];
 let currentPage = 1;
 const rowsPerPage = 10;
 
-// =====================
-// Eventos
-// =====================
 $("#fechaa").on("change", function () {
-    const valorFecha = $("#fechaa").val();
+  const valorFecha = $("#fechaa").val();
 
-    if (!valorFecha) return;
+  if (!valorFecha) return;
 
-    const [yearFecha, mesFecha] = valorFecha.split("-");
-    const search = $("#buscar").val().trim();
+  const [yearFecha, mesFecha] = valorFecha.split("-");
 
-    cargarTabla(mesFecha, yearFecha, search);
+  currentPage = 1;
+
+  cargarTabla(mesFecha, yearFecha);
 });
 
 $("#buscar").on("input", function () {
-    currentPage = 1;
-    renderTable();
+  currentPage = 1;
+  renderTable();
 });
 
 // =====================
 // Helpers visuales
 // =====================
 function escapeHtml(value) {
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function formatMoney(value) {
-    const number = parseFloat(value);
+  const number = parseFloat(value);
 
-    if (isNaN(number)) {
-        return "$0.00";
-    }
+  if (isNaN(number)) {
+    return "$0.00";
+  }
 
-    return number.toLocaleString("es-MX", {
-        style: "currency",
-        currency: "MXN"
-    });
+  return number.toLocaleString("es-MX", {
+    style: "currency",
+    currency: "MXN",
+  });
 }
 
 function normalizeTipo(tipo) {
-    const value = String(tipo ?? "").trim();
+  const value = String(tipo ?? "").trim();
 
-    const tipos = {
-        "1": "Gasto",
-        "2": "Ingreso",
-        "3": "Banco Ingreso",
-        "4": "Banco Gasto"
-    };
+  const tipos = {
+    1: "Gasto",
+    2: "Ingreso",
+    3: "Ingreso Banco",
+    4: "Gasto Banco",
+  };
 
-    return tipos[value] || value || "-";
+  return tipos[value] || "Desconocido";
 }
 
 function getTipoBadge(tipo) {
-    const value = String(tipo ?? "").trim();
-    const label = normalizeTipo(value);
+  const value = String(tipo ?? "").trim();
+  const label = normalizeTipo(value);
 
-    if (value === "1" || label.toLowerCase() === "gasto") {
-        return `
+  if (value === "1") {
+    return `
             <span class="inline-flex items-center gap-2 rounded-full border border-red-400/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-300">
                 <i class="fa-solid fa-arrow-trend-down"></i>
                 ${label}
             </span>
         `;
-    }
+  }
 
-    if (value === "2" || label.toLowerCase() === "ingreso") {
-        return `
+  if (value === "2") {
+    return `
             <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
                 <i class="fa-solid fa-arrow-trend-up"></i>
                 ${label}
             </span>
         `;
-    }
+  }
 
-    if (value === "3" || label.toLowerCase() === "banco ingreso") {
-        return `
+  if (value === "3") {
+    return `
             <span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-300">
                 <i class="fa-solid fa-building-columns"></i>
                 ${label}
             </span>
         `;
-    }
+  }
 
-    if (value === "4" || label.toLowerCase() === "banco gasto") {
-        return `
+  if (value === "4") {
+    return `
             <span class="inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-300">
                 <i class="fa-solid fa-building-columns"></i>
                 ${label}
             </span>
         `;
-    }
+  }
 
-    return `
+  return `
         <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-cyan-100">
             ${escapeHtml(label)}
         </span>
@@ -119,112 +117,109 @@ function getTipoBadge(tipo) {
 }
 
 function getCostoClass(tipo) {
-    const value = String(tipo ?? "").trim();
-    const label = normalizeTipo(value).toLowerCase();
+  const value = String(tipo ?? "").trim();
 
-    if (value === "1" || value === "4" || label.includes("gasto")) {
-        return "text-red-300";
-    }
+  if (value === "1" || value === "4") {
+    return "text-red-300";
+  }
 
-    return "text-emerald-300";
+  return "text-emerald-300";
 }
 
 function getCostoSign(tipo) {
-    const value = String(tipo ?? "").trim();
-    const label = normalizeTipo(value).toLowerCase();
+  const value = String(tipo ?? "").trim();
 
-    if (value === "1" || value === "4" || label.includes("gasto")) {
-        return "-";
-    }
+  if (value === "1" || value === "4") {
+    return "-";
+  }
 
-    return "+";
+  return "+";
 }
 
 function isGasto(row) {
-    const value = String(row.tipo ?? "").trim();
-    const label = normalizeTipo(value).toLowerCase();
+  const value = String(row.tipo ?? "").trim();
 
-    return value === "1" || value === "4" || label.includes("gasto");
+  return value === "1" || value === "4";
 }
 
 function isIngreso(row) {
-    const value = String(row.tipo ?? "").trim();
-    const label = normalizeTipo(value).toLowerCase();
+  const value = String(row.tipo ?? "").trim();
 
-    return value === "2" || value === "3" || label.includes("ingreso");
+  return value === "2" || value === "3";
 }
 
 function getFilteredData() {
-    const q = ($("#buscar").val() || "").toLowerCase().trim();
+  const q = ($("#buscar").val() || "").toLowerCase().trim();
 
-    if (!q) {
-        return dataRegistros;
-    }
+  if (!q) {
+    return dataRegistros;
+  }
 
-    const inc = (v) => String(v ?? "").toLowerCase().includes(q);
+  const inc = (value) =>
+    String(value ?? "")
+      .toLowerCase()
+      .includes(q);
 
-    return dataRegistros.filter(row =>
-        inc(row.id) ||
-        inc(row.fecha) ||
-        inc(row.titulo) ||
-        inc(row.descripcion) ||
-        inc(row.tipo) ||
-        inc(normalizeTipo(row.tipo)) ||
-        inc(row.usuario) ||
-        inc(row.costo)
-    );
+  return dataRegistros.filter(
+    (row) =>
+      inc(row.id) ||
+      inc(row.fecha) ||
+      inc(row.titulo) ||
+      inc(row.descripcion) ||
+      inc(normalizeTipo(row.tipo)) ||
+      inc(row.usuario) ||
+      inc(row.costo),
+  );
 }
 
 function updateResumen(filteredData) {
-    let totalGastos = 0;
-    let totalIngresos = 0;
+  let totalGastos = 0;
+  let totalIngresos = 0;
 
-    filteredData.forEach(row => {
-        const costo = parseFloat(row.costo) || 0;
+  filteredData.forEach((row) => {
+    const costo = parseFloat(row.costo) || 0;
 
-        if (isGasto(row)) {
-            totalGastos += costo;
-        }
+    if (isGasto(row)) {
+      totalGastos += costo;
+    }
 
-        if (isIngreso(row)) {
-            totalIngresos += costo;
-        }
-    });
+    if (isIngreso(row)) {
+      totalIngresos += costo;
+    }
+  });
 
-    $("#totalRegistros").text(filteredData.length);
-    $("#totalGastos").text(formatMoney(totalGastos));
-    $("#totalIngresos").text(formatMoney(totalIngresos));
+  $("#totalRegistros").text(filteredData.length);
+  $("#totalGastos").text(formatMoney(totalGastos));
+  $("#totalIngresos").text(formatMoney(totalIngresos));
 }
 
 function updateEmptyState(filteredData) {
-    if (filteredData.length === 0) {
-        $("#tablaVacia").removeClass("hidden");
-        $("#tablaGastos").addClass("hidden");
-    } else {
-        $("#tablaVacia").addClass("hidden");
-        $("#tablaGastos").removeClass("hidden");
-    }
+  if (filteredData.length === 0) {
+    $("#tablaVacia").removeClass("hidden");
+    $("#tablaGastos").addClass("hidden");
+  } else {
+    $("#tablaVacia").addClass("hidden");
+    $("#tablaGastos").removeClass("hidden");
+  }
 }
 
 function updatePaginationInfo(totalRows, start, end) {
-    if (totalRows === 0) {
-        $("#paginationInfo").text("Sin registros para mostrar.");
-        return;
-    }
+  if (totalRows === 0) {
+    $("#paginationInfo").text("Sin registros para mostrar.");
+    return;
+  }
 
-    $("#paginationInfo").text(`Mostrando ${start + 1} a ${Math.min(end, totalRows)} de ${totalRows} registros.`);
+  $("#paginationInfo").text(
+    `Mostrando ${start + 1} a ${Math.min(end, totalRows)} de ${totalRows} registros.`,
+  );
 }
 
-// =====================
-// Cargar tabla desde PHP
-// =====================
-function cargarTabla(mes, year, search = "") {
-    let formData = new FormData();
-    formData.append("mes", mes);
-    formData.append("year", year);
-    formData.append("search", search);
+function cargarTabla(mes, year) {
+  let formData = new FormData();
+  formData.append("mes", mes);
+  formData.append("year", year);
 
-    $("#tablaBody").html(`
+  $("#tablaBody").html(`
         <tr>
             <td colspan="8" class="px-5 py-10 text-center text-cyan-100/70">
                 <i class="fa-solid fa-spinner fa-spin mr-2 text-cyan-300"></i>
@@ -233,39 +228,39 @@ function cargarTabla(mes, year, search = "") {
         </tr>
     `);
 
-    $("#tablaVacia").addClass("hidden");
-    $("#tablaGastos").removeClass("hidden");
+  $("#tablaVacia").addClass("hidden");
+  $("#tablaGastos").removeClass("hidden");
 
-    $.ajax({
-        url: '../php/cargarTabla.php',
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        dataType: 'json',
-        success: function (response) {
-            if (Array.isArray(response)) {
-                dataRegistros = response;
-            } else {
-                dataRegistros = [];
-                console.warn("La respuesta no es un arreglo:", response);
-            }
+  $.ajax({
+    url: "../php/cargarTabla.php",
+    data: formData,
+    processData: false,
+    contentType: false,
+    type: "POST",
+    dataType: "json",
+    success: function (response) {
+      if (Array.isArray(response)) {
+        dataRegistros = response;
+      } else {
+        dataRegistros = [];
+        console.warn("La respuesta no es un arreglo:", response);
+      }
 
-            currentPage = 1;
-            renderTable();
-        },
-        error: function (xhr) {
-            console.error("Error AJAX:", xhr.responseText);
+      currentPage = 1;
+      renderTable();
+    },
+    error: function (xhr) {
+      console.error("Error AJAX:", xhr.responseText);
 
-            dataRegistros = [];
-            updateResumen([]);
-            $("#pagination").html("");
-            $("#paginationInfo").text("No se pudo cargar la información.");
+      dataRegistros = [];
+      updateResumen([]);
+      $("#pagination").html("");
+      $("#paginationInfo").text("No se pudo cargar la información.");
 
-            $("#tablaGastos").removeClass("hidden");
-            $("#tablaVacia").addClass("hidden");
+      $("#tablaGastos").removeClass("hidden");
+      $("#tablaVacia").addClass("hidden");
 
-            $('#tablaBody').html(`
+      $("#tablaBody").html(`
                 <tr>
                     <td colspan="8" class="px-5 py-10 text-center">
                         <div class="mx-auto mb-3 w-14 h-14 rounded-2xl bg-red-500/10 border border-red-400/20 flex items-center justify-center">
@@ -276,60 +271,58 @@ function cargarTabla(mes, year, search = "") {
                     </td>
                 </tr>
             `);
-        }
-    });
+    },
+  });
 }
 
-// Alias para el botón Actualizar del HTML
 function cargarGastos() {
-    const valorFecha = $("#fechaa").val();
+  const valorFecha = $("#fechaa").val();
 
-    if (!valorFecha) return;
+  if (!valorFecha) return;
 
-    const [yearFecha, mesFecha] = valorFecha.split("-");
-    const search = $("#buscar").val().trim();
+  const [yearFecha, mesFecha] = valorFecha.split("-");
 
-    cargarTabla(mesFecha, yearFecha, search);
+  currentPage = 1;
+
+  cargarTabla(mesFecha, yearFecha);
 }
 
-// =====================
-// Renderizado tabla
-// =====================
 function renderTable() {
-    const filteredData = getFilteredData();
+  const filteredData = getFilteredData();
 
-    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
-    if (currentPage > totalPages && totalPages > 0) {
-        currentPage = totalPages;
-    }
+  if (currentPage > totalPages && totalPages > 0) {
+    currentPage = totalPages;
+  }
 
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    const dataToShow = filteredData.slice(start, end);
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const dataToShow = filteredData.slice(start, end);
 
-    updateResumen(filteredData);
-    updateEmptyState(filteredData);
-    updatePaginationInfo(filteredData.length, start, end);
+  updateResumen(filteredData);
+  updateEmptyState(filteredData);
+  updatePaginationInfo(filteredData.length, start, end);
 
-    if (filteredData.length === 0) {
-        $("#tablaBody").html("");
-        renderPagination(0);
-        return;
-    }
+  if (filteredData.length === 0) {
+    $("#tablaBody").html("");
+    renderPagination(0);
+    return;
+  }
 
-    let html = "";
+  let html = "";
 
-    dataToShow.forEach(row => {
-        const id = escapeHtml(row.id);
-        const fecha = escapeHtml(row.fecha || "-");
-        const titulo = escapeHtml(row.titulo || "-");
-        const usuario = escapeHtml(row.usuario || "-");
-        const costo = parseFloat(row.costo) || 0;
-        const costoClass = getCostoClass(row.tipo);
-        const costoSign = getCostoSign(row.tipo);
+  dataToShow.forEach((row) => {
+    const id = escapeHtml(row.id);
+    const fecha = escapeHtml(row.fecha || "-");
+    const titulo = escapeHtml(row.titulo || "-");
+    const descripcion = escapeHtml(row.descripcion || "");
+    const usuario = escapeHtml(row.usuario || "-");
+    const costo = parseFloat(row.costo) || 0;
+    const costoClass = getCostoClass(row.tipo);
+    const costoSign = getCostoSign(row.tipo);
 
-        html += `
+    html += `
             <tr class="group border-b border-white/10 hover:bg-cyan-400/5 transition">
                 <td class="px-5 py-4 align-middle">
                     <span class="inline-flex items-center justify-center min-w-10 rounded-xl border border-cyan-400/15 bg-cyan-400/10 px-3 py-1 text-sm font-bold text-cyan-200">
@@ -343,10 +336,26 @@ function renderTable() {
                 </td>
 
                 <td class="px-5 py-4 align-middle">
-                    <p class="font-bold text-white max-w-[260px] truncate" title="${titulo}">
-                        ${titulo}
-                    </p>
-                </td>
+    <p class="font-bold text-white max-w-[280px] truncate"
+       title="${titulo}">
+        ${titulo}
+    </p>
+
+    ${
+      descripcion
+        ? `
+            <p class="mt-1 text-xs text-cyan-100/50 max-w-[280px] truncate"
+               title="${descripcion}">
+                ${descripcion}
+            </p>
+        `
+        : `
+            <p class="mt-1 text-xs text-cyan-100/30">
+                Sin descripción
+            </p>
+        `
+    }
+</td>
 
                 <td class="px-5 py-4 align-middle whitespace-nowrap">
                     <span class="font-extrabold ${costoClass}">
@@ -364,7 +373,8 @@ function renderTable() {
                 </td>
 
                 <td class="px-5 py-4 align-middle text-center">
-                    ${row.evidencia
+                    ${
+                      row.evidencia
                         ? `
                             <button type="button"
                                 onclick="verImagen('${escapeHtml(row.evidencia)}')"
@@ -400,25 +410,25 @@ function renderTable() {
                 </td>
             </tr>
         `;
-    });
+  });
 
-    $("#tablaBody").html(html);
-    renderPagination(filteredData.length);
+  $("#tablaBody").html(html);
+  renderPagination(filteredData.length);
 }
 
 // =====================
 // Paginación
 // =====================
 function renderPagination(totalRows) {
-    const totalPages = Math.ceil(totalRows / rowsPerPage);
-    let html = "";
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  let html = "";
 
-    if (totalPages <= 1) {
-        $("#pagination").html("");
-        return;
-    }
+  if (totalPages <= 1) {
+    $("#pagination").html("");
+    return;
+  }
 
-    html += `
+  html += `
         <button type="button"
             onclick="changePage(${currentPage - 1})"
             ${currentPage === 1 ? "disabled" : ""}
@@ -427,35 +437,30 @@ function renderPagination(totalRows) {
         </button>
     `;
 
-    for (let i = 1; i <= totalPages; i++) {
-        if (
-            i === 1 ||
-            i === totalPages ||
-            Math.abs(i - currentPage) <= 2
-        ) {
-            html += `
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+      html += `
                 <button type="button"
                     onclick="changePage(${i})"
                     class="inline-flex items-center justify-center min-w-10 h-10 rounded-xl px-3 text-sm font-bold transition
-                    ${i === currentPage
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-blue-950/40'
-                        : 'border border-white/10 bg-white/5 text-cyan-100 hover:bg-white/10'}">
+                    ${
+                      i === currentPage
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-blue-950/40"
+                        : "border border-white/10 bg-white/5 text-cyan-100 hover:bg-white/10"
+                    }">
                     ${i}
                 </button>
             `;
-        } else if (
-            i === currentPage - 3 ||
-            i === currentPage + 3
-        ) {
-            html += `
+    } else if (i === currentPage - 3 || i === currentPage + 3) {
+      html += `
                 <span class="inline-flex items-center justify-center min-w-10 h-10 text-cyan-100/40">
                     ...
                 </span>
             `;
-        }
     }
+  }
 
-    html += `
+  html += `
         <button type="button"
             onclick="changePage(${currentPage + 1})"
             ${currentPage === totalPages ? "disabled" : ""}
@@ -464,161 +469,169 @@ function renderPagination(totalRows) {
         </button>
     `;
 
-    $("#pagination").html(html);
+  $("#pagination").html(html);
 }
 
 function changePage(page) {
-    const filteredData = getFilteredData();
-    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const filteredData = getFilteredData();
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
-    if (page < 1 || page > totalPages) {
-        return;
-    }
+  if (page < 1 || page > totalPages) {
+    return;
+  }
 
-    currentPage = page;
-    renderTable();
+  currentPage = page;
+  renderTable();
 }
 
 // =====================
 // Editar
 // =====================
 function editGI(id) {
-    $.ajax({
-        url: "../php/editarGI.php",
-        type: "POST",
-        data: { id: id },
-        success: function (response) {
-            $('#modal2').html(response);
+  $.ajax({
+    url: "../php/editarGI.php",
+    type: "POST",
+    data: { id: id },
+    success: function (response) {
+      $("#modal2").html(response);
 
-            if ($("#tipo").val() == "1" || $("#tipo").val() == "4") {
-                $("#costo").removeClass("verde").addClass("rojo");
-            } else {
-                $("#costo").removeClass("rojo").addClass("verde");
-            }
+      if ($("#tipo").val() == "1" || $("#tipo").val() == "4") {
+        $("#costo").removeClass("verde").addClass("rojo");
+      } else {
+        $("#costo").removeClass("rojo").addClass("verde");
+      }
 
-            var modal = new bootstrap.Modal(document.getElementById('modalEditar'));
-            modal.show();
-        },
-        error: function () {
-            Swal.fire("Error", "No se pudo cargar el formulario de edición.", "error");
-        }
-    });
+      var modal = new bootstrap.Modal(document.getElementById("modalEditar"));
+      modal.show();
+    },
+    error: function () {
+      Swal.fire(
+        "Error",
+        "No se pudo cargar el formulario de edición.",
+        "error",
+      );
+    },
+  });
 }
 
 // =====================
 // Actualizar
 // =====================
 function updateGI() {
-    let id = $('#id').val();
-    let titulo = $('#titulo').val();
-    let costo = $('#costo').val();
-    let descripcion = $('#descripcion').val();
-    let fecha = $('#fecha').val();
-    let tipo = $('#tipo').val();
-    let nombrede = $('#nombrede').val();
-    let iduser = $('#id-user').val();
+  let id = $("#id").val();
+  let titulo = $("#titulo").val();
+  let costo = $("#costo").val();
+  let descripcion = $("#descripcion").val();
+  let fecha = $("#fecha").val();
+  let tipo = $("#tipo").val();
+  let nombrede = $("#nombrede").val();
+  let iduser = $("#id-user").val();
 
-    let formData2 = new FormData();
-    formData2.append('id', id);
-    formData2.append('titulo', titulo);
-    formData2.append('costo', costo);
-    formData2.append('descripcion', descripcion);
-    formData2.append('fecha', fecha);
-    formData2.append('tipo', tipo);
-    formData2.append('nombrede', nombrede);
-    formData2.append('iduser', iduser);
+  let formData2 = new FormData();
+  formData2.append("id", id);
+  formData2.append("titulo", titulo);
+  formData2.append("costo", costo);
+  formData2.append("descripcion", descripcion);
+  formData2.append("fecha", fecha);
+  formData2.append("tipo", tipo);
+  formData2.append("nombrede", nombrede);
+  formData2.append("iduser", iduser);
 
-    $.ajax('../php/updateGI.php', {
-        method: 'POST',
-        data: formData2,
-        processData: false,
-        contentType: false,
-        success: function (data) {
-            let jsonResponse;
+  $.ajax("../php/updateGI.php", {
+    method: "POST",
+    data: formData2,
+    processData: false,
+    contentType: false,
+    success: function (data) {
+      let jsonResponse;
 
-            try {
-                jsonResponse = JSON.parse(data);
-            } catch (e) {
-                console.error(data);
-                Swal.fire('Error', 'La respuesta del servidor no es válida.', 'error');
-                return;
-            }
+      try {
+        jsonResponse = JSON.parse(data);
+      } catch (e) {
+        console.error(data);
+        Swal.fire("Error", "La respuesta del servidor no es válida.", "error");
+        return;
+      }
 
-            if (jsonResponse.status === "success") {
-                $('#modalEditar').modal('hide');
-                cargarGastos();
-                Swal.fire('Éxito', jsonResponse.message, 'success');
-            } else {
-                Swal.fire('Error', jsonResponse.message, 'error');
-            }
-        },
-        error: function () {
-            Swal.fire('Error', 'No se pudo actualizar el registro.', 'error');
-        }
-    });
+      if (jsonResponse.status === "success") {
+        $("#modalEditar").modal("hide");
+        cargarGastos();
+        Swal.fire("Éxito", jsonResponse.message, "success");
+      } else {
+        Swal.fire("Error", jsonResponse.message, "error");
+      }
+    },
+    error: function () {
+      Swal.fire("Error", "No se pudo actualizar el registro.", "error");
+    },
+  });
 }
 
 // =====================
 // Eliminar
 // =====================
 function deleteGI(id) {
-    Swal.fire({
-        title: "¿Estás seguro de eliminar el registro?",
-        text: "Esta acción no se puede deshacer.",
-        icon: "warning",
-        showDenyButton: true,
-        confirmButtonText: "Sí, eliminar",
-        denyButtonText: "Cancelar",
-        confirmButtonColor: "#ef4444",
-        denyButtonColor: "#334155"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let formData = new FormData();
-            formData.append('id', id);
+  Swal.fire({
+    title: "¿Estás seguro de eliminar el registro?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showDenyButton: true,
+    confirmButtonText: "Sí, eliminar",
+    denyButtonText: "Cancelar",
+    confirmButtonColor: "#ef4444",
+    denyButtonColor: "#334155",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let formData = new FormData();
+      formData.append("id", id);
 
-            $.ajax('../php/deleteGI.php', {
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (data) {
-                    let jsonResponse;
+      $.ajax("../php/deleteGI.php", {
+        method: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          let jsonResponse;
 
-                    try {
-                        jsonResponse = JSON.parse(data);
-                    } catch (e) {
-                        console.error(data);
-                        Swal.fire('Error', 'La respuesta del servidor no es válida.', 'error');
-                        return;
-                    }
+          try {
+            jsonResponse = JSON.parse(data);
+          } catch (e) {
+            console.error(data);
+            Swal.fire(
+              "Error",
+              "La respuesta del servidor no es válida.",
+              "error",
+            );
+            return;
+          }
 
-                    if (jsonResponse.status === "success") {
-                        cargarGastos();
-                        Swal.fire('Éxito', jsonResponse.message, 'success');
-                    } else {
-                        Swal.fire('Error', jsonResponse.message, 'error');
-                    }
-                },
-                error: function () {
-                    Swal.fire('Error', 'No se pudo eliminar el registro.', 'error');
-                }
-            });
-        }
-    });
+          if (jsonResponse.status === "success") {
+            cargarGastos();
+            Swal.fire("Éxito", jsonResponse.message, "success");
+          } else {
+            Swal.fire("Error", jsonResponse.message, "error");
+          }
+        },
+        error: function () {
+          Swal.fire("Error", "No se pudo eliminar el registro.", "error");
+        },
+      });
+    }
+  });
 }
 
 // =====================
 // Ver evidencia
 // =====================
 function verImagen(ruta) {
-    if (!ruta) return;
+  if (!ruta) return;
 
-    const extension = String(ruta).split('.').pop().toLowerCase();
+  const extension = String(ruta).split(".").pop().toLowerCase();
 
-    if (extension === "pdf") {
-        Swal.fire({
-            title: "Evidencia PDF",
-            html: `
+  if (extension === "pdf") {
+    Swal.fire({
+      title: "Evidencia PDF",
+      html: `
                 <div class="rounded-2xl border border-cyan-400/20 bg-[#071322] p-4">
                     <i class="fa-solid fa-file-pdf text-red-300 text-5xl mb-3"></i>
                     <p class="text-sm text-cyan-100/70 mb-4">El archivo seleccionado es un PDF.</p>
@@ -629,26 +642,26 @@ function verImagen(ruta) {
                     </a>
                 </div>
             `,
-            background: "#06152d",
-            color: "#ffffff",
-            showConfirmButton: false,
-            showCloseButton: true
-        });
-        return;
-    }
-
-    Swal.fire({
-        title: "Evidencia",
-        text: 'Haz clic fuera de la imagen para cerrar',
-        imageUrl: ruta,
-        imageAlt: 'Evidencia',
-        showConfirmButton: false,
-        showCloseButton: true,
-        allowOutsideClick: true,
-        background: "#06152d",
-        color: "#ffffff",
-        imageWidth: 420
+      background: "#06152d",
+      color: "#ffffff",
+      showConfirmButton: false,
+      showCloseButton: true,
     });
+    return;
+  }
+
+  Swal.fire({
+    title: "Evidencia",
+    text: "Haz clic fuera de la imagen para cerrar",
+    imageUrl: ruta,
+    imageAlt: "Evidencia",
+    showConfirmButton: false,
+    showCloseButton: true,
+    allowOutsideClick: true,
+    background: "#06152d",
+    color: "#ffffff",
+    imageWidth: 420,
+  });
 }
 
 // =====================

@@ -133,7 +133,7 @@ if (!isset($_SESSION['username'])) {
         <div class="mb-5 grid grid-cols-1 md:grid-cols-3 gap-4">
 
           <div class="rounded-2xl border border-cyan-400/15 bg-[#071b36]/80 p-4">
-            <p class="text-sm text-cyan-100/60">Registros cargados</p>
+            <p class="text-sm text-cyan-100/60">Registros encontrados</p>
             <h3 id="totalRegistros" class="mt-1 text-2xl font-bold text-white">0</h3>
           </div>
 
